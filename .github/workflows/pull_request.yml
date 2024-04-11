@@ -1,0 +1,72 @@
+name: Lint
+
+on: [pull_request]
+
+jobs:
+  lint:
+    name: Run TS Project lint and prettier
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out TS Project Git repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install TS Project dependencies
+        run: npm ci
+
+      - name: Run TS Project linters
+        uses: wearerequired/lint-action@v2
+        with:
+          github_token: ${{ secrets.github_token }}
+          # Enable linters
+          eslint: true
+          prettier: true
+          eslint_extensions: ts
+
+  upload_package:
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out TS Project Git repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+      - name: Install TS Project dependencies
+        run: npm ci
+      - name: Pack the package
+        run: npm pack
+      - name: get properties
+        id: json_properties
+        uses: ActionsTools/read-json-action@main
+        with:
+          file_path: 'package.json'
+      - uses: azure/CLI@v2
+        env:
+          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.SAS_TOKEN }}
+        with:
+          inlineScript: |
+            az storage blob upload --name config-$GITHUB_SHA.tgz --account-name ghatmpstorage --container-name=npm-packages --file map-colonies-config-${{steps.json_properties.outputs.version}}.tgz
+      - name: Comment on PR
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Hi it is me, your friendly bot helper! :wave:
+            I've packed this commit for you :blush:
+            You can install it like this:
+            ```json
+            {
+              "dependencies": {
+                  "@map-colonies/config": "https://ghatmpstorage.blob.core.windows.net/npm-packages/config-${{ github.sha }}.tgz"
+              }
+            }
+            ```
+            The link will expire in a week :hourglass:
