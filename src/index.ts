@@ -1,45 +1,68 @@
 /* eslint-disable */
 
-import type { typeSymbol } from '@map-colonies/schemas/build/schemas/symbol';
+import { typeSymbol } from '@map-colonies/schemas/build/schemas/symbol';
+import configPkg from 'config';
 import { commonBoilerplateV1, type commonBoilerplateV1Type } from '@map-colonies/schemas';
-import type { JSONSchema } from 'json-schema-to-ts';
+import { JSONSchema } from 'json-schema-to-ts';
 import _, { GetFieldType } from 'lodash';
+import { request } from 'undici';
 import EventEmitter from 'node:events';
 import type TypedEmitter from 'typed-emitter';
+import assert, { strictEqual } from 'node:assert';
 
 type MessageEvents = {
   error: (error: Error) => void;
   update: () => void;
 };
 
-class Config<T extends JSONSchema & { [typeSymbol]: unknown }> extends (EventEmitter as new () => TypedEmitter<MessageEvents>) {
-  public constructor(public schema: T, options?: {
-    configUrl?: string;
-    token?: string;
-    debug?: boolean;
-  }) {
-    super();
-  }
-
-  public getConfig(): T[typeof typeSymbol] {
-    return {};
-  }
-
-  public async loadConfig(): Promise<void> {}
-
-  // @ts-expect-error
-  public get<TPath extends string>(path: TPath): GetFieldType<T[typeof typeSymbol], TPath> {
-    return _.get(this.schema[typeSymbol], path);
-  }
+interface Config {
+  configName: string;
+  schemaId: string;
+  version: number;
+  config: {
+    [key: string]: unknown;
+  };
+  createdAt: number;
+  createdBy: string;
 }
 
-const config = new Config(commonBoilerplateV1);
+async function FConfig<T extends JSONSchema & { [typeSymbol]: unknown }>(
+  schema: T,
+  configName: string,
+  version: 'latest' | number = 'latest',
+  options?: {
+    configServerUrl?: string;
+    offlineMode?: boolean;
+    token?: string;
+    debug?: boolean;
+  }
+) {
+  const url = `${options?.configServerUrl}/config/${configName}/${version}`;
+  const { body, statusCode } = await request(url);
 
-const res = config.get('telemetry.logger.level');
+  assert(statusCode === 200, `Failed to fetch config from ${url}`);
 
-const b: (typeof commonBoilerplateV1)[typeof typeSymbol] = '';
-const c: commonBoilerplateV1Type = '';
+  const config = (await body.json()) as Config;
 
-const a = _.get(b, 'telemetry.logger');
-const aa = _.get(b, 'openapiConfig.filePath');
-const aaa = _.get(b, 'server.request.payload.limit');
+  assert(typeof schema !== 'boolean' && config.schemaId === schema.$id, `Schema ID mismatch`);
+
+  console.log(config);
+  console.log(configPkg.util.loadFileConfigs('../config'));
+
+  Object.freeze(config.config);
+
+  function get<TPath extends string>(path: TPath): GetFieldType<T[typeof typeSymbol], TPath> {
+    return _.get(config.config as (typeof schema)[typeof typeSymbol], path);
+  }
+
+  return { get };
+}
+
+// const config = new Config(commonBoilerplateV1,'avi');
+// const res = config.get('telemetry.logger');
+
+(async () => {
+  const fconfig = await FConfig(commonBoilerplateV1, 'test-boilerplate', 'latest', { configServerUrl: 'http://localhost:8080' });
+  const res2 = fconfig.get('telemetry.logger');
+  // console.log(res2);
+})().catch(console.error);
