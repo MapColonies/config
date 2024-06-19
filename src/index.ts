@@ -1,76 +1,53 @@
 import assert from 'node:assert';
-import path from 'node:path';
-import fs from 'node:fs';
-import StatusCodes from 'http-status-codes';
 import deepmerge from 'deepmerge';
 import { typeSymbol } from '@map-colonies/schemas/build/schemas/symbol';
+import { readPackageJsonSync } from '@map-colonies/read-pkg';
 import configPkg from 'config';
-import { commonBoilerplateV1, commonDbFullV1, commonDbPartialV1, commonS3PartialV1 } from '@map-colonies/schemas';
-import _, { GetFieldType } from 'lodash';
-import { request } from 'undici';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
-import $RefParser, { JSONSchema } from '@apidevtools/json-schema-ref-parser';
-import { parseSchemaEnv } from './envParser';
-import { Config, ConfigOptions } from './types';
+import semver from 'semver';
+import _, { type GetFieldType } from 'lodash';
+import { JSONSchema } from '@apidevtools/json-schema-ref-parser';
+import { getEnvValues } from './env';
+import { BaseOptions, ConfigOptions, ConfigReturnType } from './types';
 import { loadSchema } from './schemas';
+import { getOptions, initializeOptions } from './options';
+import { getRemoteConfig, getServerCapabilities } from './httpClient';
+import { ajvConfigValidator } from './validator';
+import { createDebug } from './debug';
 
-const ajv = addFormats(
-  new Ajv({
-    useDefaults: true,
-  }),
-  ['date-time', 'time', 'date', 'email', 'hostname', 'ipv4', 'ipv6', 'uri', 'uuid', 'regex', 'uri-template']
-);
+const debug  = createDebug('index');
 
-function getEnvValues(schema: JSONSchema): object {
-  const res = {};
+const schemasPackagePath = require.resolve('@map-colonies/schemas').substring(0, require.resolve('@map-colonies/schemas').indexOf('build'));
+const schemasPackageVersion = readPackageJsonSync(schemasPackagePath + 'package.json').version as string;
 
-  const envMap = parseSchemaEnv(schema);
-  for (const [key, details] of Object.entries(envMap)) {
-    const unparsedValue = process.env[key];
-    if (unparsedValue !== undefined) {
-      let value: unknown;
+async function config<T extends JSONSchema & { [typeSymbol]: unknown }>(options: ConfigOptions<T>): Promise<ConfigReturnType<T>> {
+  const { schema: baseSchema, ...unvalidatedOptions } = options;
+  const { configName, offlineMode, version, ignoreServerIsOlderVersionError } = initializeOptions(unvalidatedOptions);
 
-      switch (details.type) {
-        case 'boolean':
-          value = value === 'true';
-          break;
-        case 'integer':
-          value = parseInt(unparsedValue);
-          break;
-        case 'number':
-          value = parseFloat(unparsedValue);
-          break;
-        case 'null':
-          value = null;
-          break;
-        default:
-          value = unparsedValue;
-      }
+  let remoteConfig: object | T = {};
 
-      _.set(res, details.path, value);
-    }
+  if (!offlineMode) {
+    const capabilitiesResponse = await getServerCapabilities();
+
+    assert(!ignoreServerIsOlderVersionError && semver.lt(schemasPackageVersion, capabilitiesResponse.schemasPackageVersion), `Server is using an older version of the schemas package`);
+
+    const serverConfigResponse = await getRemoteConfig(configName, version);
+
+    assert(typeof baseSchema !== 'boolean' && serverConfigResponse.schemaId === baseSchema.$id, `Schema ID mismatch`);
+
+    remoteConfig = serverConfigResponse.config;
   }
-
-  return res;
-}
-
-async function config<T extends JSONSchema & { [typeSymbol]: unknown }>(options: ConfigOptions<T>) {
-  const { configName, configServerUrl, version, schema: baseSchema } = options;
-
-  assert(typeof baseSchema !== 'boolean' && config.schemaId === baseSchema.$id, `Schema ID mismatch`);
   const dereferencedSchema = await loadSchema(baseSchema);
-  console.log(dereferencedSchema);
 
   const localConfig = configPkg.util.loadFileConfigs('../config') as { [key: string]: unknown };
 
   const envConfig = getEnvValues(dereferencedSchema);
 
-  const mergedConfig = deepmerge.all([localConfig, config.config, envConfig], { arrayMerge: (destinationArray, sourceArray) => sourceArray });
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  const mergedConfig = deepmerge.all([localConfig, remoteConfig, envConfig], { arrayMerge: (destinationArray, sourceArray) => sourceArray });
 
-  const isValid = ajv.validate(dereferencedSchema, mergedConfig);
+  const isValid = ajvConfigValidator.validate(dereferencedSchema, mergedConfig);
   if (!isValid) {
-    console.log(ajv.errors);
+    console.log(ajvConfigValidator);
     throw new Error('Invalid config');
   }
 
@@ -81,19 +58,23 @@ async function config<T extends JSONSchema & { [typeSymbol]: unknown }>(options:
     return _.get(mergedConfig as (typeof baseSchema)[typeof typeSymbol], path);
   }
 
-  function getAll(): T[typeof typeSymbol] {
+  function getAll(): ReturnType<ConfigReturnType<T>['getAll']> {
     return mergedConfig;
   }
 
-  function getConfigParts(): { localConfig: { [key: string]: unknown }; config: T; envConfig: object } {
+  function getConfigParts(): ReturnType<ConfigReturnType<T>['getConfigParts']> {
     return {
       localConfig,
-      config: config.config as T,
+      config: remoteConfig,
       envConfig,
     };
   }
 
-  return { get, getAll, getConfigParts };
+  function getResolvedOptions(): BaseOptions {
+    return getOptions();
+  }
+
+  return { get, getAll, getConfigParts, getResolvedOptions };
 }
 
 // const config = new Config(commonBoilerplateV1,'avi');

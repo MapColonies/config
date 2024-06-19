@@ -1,5 +1,9 @@
 import { JSONSchema } from '@apidevtools/json-schema-ref-parser';
+import _ from 'lodash';
 import { EnvMap, EnvType } from './types';
+import { createDebug } from './debug';
+
+const debug = createDebug('env');
 
 const schemaCompositionKeys = ['oneOf', 'anyOf', 'allOf'] as const;
 
@@ -51,4 +55,37 @@ export function parseSchemaEnv(schema: JSONSchema): EnvMap {
 
   iterateOverSchemaObject(schema, '');
   return fromEnv;
+}
+
+export function getEnvValues(schema: JSONSchema): object {
+  const res = {};
+
+  const envMap = parseSchemaEnv(schema);
+  for (const [key, details] of Object.entries(envMap)) {
+    const unparsedValue = process.env[key];
+    if (unparsedValue !== undefined) {
+      let value: unknown;
+
+      switch (details.type) {
+        case 'boolean':
+          value = value === 'true';
+          break;
+        case 'integer':
+          value = parseInt(unparsedValue);
+          break;
+        case 'number':
+          value = parseFloat(unparsedValue);
+          break;
+        case 'null':
+          value = null;
+          break;
+        default:
+          value = unparsedValue;
+      }
+
+      _.set(res, details.path, value);
+    }
+  }
+
+  return res;
 }
