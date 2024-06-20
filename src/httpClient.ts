@@ -17,9 +17,11 @@ async function createHttpErrorPayload(res: Dispatcher.ResponseData): Promise<Con
 }
 
 async function requestWrapper(url: string): Promise<Dispatcher.ResponseData> {
+  debug('Making request to %s', url);
   try {
     const res = await request(url);
     if (res.statusCode > StatusCodes.NOT_FOUND) {
+      debug('Failed to fetch config. Status code: %d', res.statusCode);
       throw createConfigError('httpResponseError', 'Failed to fetch config', await createHttpErrorPayload(res));
     }
     return res;
@@ -27,32 +29,37 @@ async function requestWrapper(url: string): Promise<Dispatcher.ResponseData> {
     if (error instanceof ConfigError) {
       throw error;
     }
+    debug('An error occurred while making the request: %s', (error as Error).message);
     throw createConfigError('httpGeneralError', 'An error occurred while making the request', error as Error);
   }
 }
 
 export async function getRemoteConfig(configName: string, version: number | 'latest'): Promise<Config> {
+  debug('Fetching remote config %s@%s', configName, version);
   const { configServerUrl } = getOptions();
   const url = `${configServerUrl}/config/${configName}/${version}`;
   const res = await requestWrapper(url);
 
   if (res.statusCode === StatusCodes.BAD_REQUEST) {
+    debug('Invalid request to getConfig');
     throw createConfigError('httpResponseError', 'Invalid request to getConfig', await createHttpErrorPayload(res));
   }
 
   if (res.statusCode === StatusCodes.NOT_FOUND) {
+    debug('Config with given name and version was not found');
     throw createConfigError('httpResponseError', 'Config with given name and version was not found', await createHttpErrorPayload(res));
   }
+  debug('Config fetched successfully');
 
   return (await res.body.json()) as Config;
 }
 
 export async function getServerCapabilities(): Promise<ServerCapabilities> {
+  debug('Fetching server capabilities');
   const { configServerUrl } = getOptions();
   const url = `${configServerUrl}/capabilities`;
-  const { body, statusCode } = await requestWrapper(url);
+  const { body } = await requestWrapper(url);
 
-  assert(statusCode === StatusCodes.OK, `Failed to fetch capabilities from ${url}`);
-
+  debug('Server capabilities fetched successfully');
   return (await body.json()) as ServerCapabilities;
 }

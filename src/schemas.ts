@@ -10,6 +10,7 @@ const debug = createDebug('schemas');
 const refParser = new $RefParser();
 
 function loadSpecificSchema(relativePath: string): JSONSchema {
+  debug('loading specific schema at path %s', relativePath);
   const fullPath = path.join(SCHEMA_BASE_PATH, relativePath + '.schema.json');
 
   if (!fs.existsSync(fullPath)) {
@@ -20,6 +21,7 @@ function loadSpecificSchema(relativePath: string): JSONSchema {
 }
 
 export async function loadSchema(schema: JSONSchema): ReturnType<typeof refParser.dereference> {
+  debug('loading schema id %s', schema.$id);
   const dereferencedSchema = await refParser.dereference(schema, {
     dereference: { circular: false },
     resolve: {

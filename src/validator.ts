@@ -24,12 +24,17 @@ export const ajvLibraryConfigValidator = new Ajv({
 });
 
 export function validate<T>(ajv: Ajv, schema: JSONSchema, data: unknown): [ValidationError[], undefined] | [undefined, T] {
+  debug('validating data %j with schema %s', data, schema.$id);
+
   const clonedData = _.cloneDeep(data);
   const valid = ajv.validate(schema, clonedData);
   if (!valid) {
+    debug('validation failed with errors %j', ajv.errors);
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     const betterErrors = betterAjvErrors({ schema: schema as Parameters<typeof betterAjvErrors>[0]['schema'], data, errors: ajv.errors });
     return [betterErrors, undefined];
   }
+
+  debug('validation successful');
   return [undefined, clonedData as T];
 }

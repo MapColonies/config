@@ -8,11 +8,14 @@ const debug = createDebug('env');
 const schemaCompositionKeys = ['oneOf', 'anyOf', 'allOf'] as const;
 
 export function parseSchemaEnv(schema: JSONSchema): EnvMap {
+  debug('parsing schema for env values');
   const fromEnv: EnvMap = {};
 
   function handlePrimitive(schema: JSONSchema, type: EnvType, path: string): void {
+    debug('handling primitive %s at path %s', type, path);
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const xFrom = (schema as { 'x-env-value'?: string })['x-env-value'];
+    debug('value of of xFrom: %s as path %s', xFrom, path);
     if (xFrom !== undefined) {
       fromEnv[xFrom] = {
         type,
@@ -22,18 +25,21 @@ export function parseSchemaEnv(schema: JSONSchema): EnvMap {
   }
 
   function iterateOverSchemaObject(schema: JSONSchema, path: string): void {
+    debug('iterating over schema object at path %s', path);
     const type = schema.type;
     if (type === 'number' || type === 'string' || type === 'boolean' || type === 'integer' || type === 'null') {
       return handlePrimitive(schema, type, path);
     }
 
     if (type === 'array' || type === 'any') {
+      debug('array or any type at path %s', path);
       return;
     }
 
     schemaCompositionKeys.forEach((key) => {
       const compositionObj = schema[key];
       if (compositionObj !== undefined) {
+        debug('going over composition object %s at path %s', key, path);
         for (const subSchema of compositionObj) {
           if (typeof subSchema !== 'boolean') {
             iterateOverSchemaObject(subSchema, path);
@@ -44,6 +50,7 @@ export function parseSchemaEnv(schema: JSONSchema): EnvMap {
 
     if (type === 'object') {
       for (const key in schema.properties) {
+        debug('going over object properties at path %s', key, path);
         const subSchema = schema.properties[key];
 
         if (typeof subSchema !== 'boolean') {
@@ -64,6 +71,7 @@ export function getEnvValues(schema: JSONSchema): object {
   for (const [key, details] of Object.entries(envMap)) {
     const unparsedValue = process.env[key];
     if (unparsedValue !== undefined) {
+      debug('found env value for key %s with type %s', key, details.type);
       let value: unknown;
 
       switch (details.type) {
