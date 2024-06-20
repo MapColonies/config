@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import $RefParser, { JSONSchema } from '@apidevtools/json-schema-ref-parser';
 import { SCHEMA_BASE_PATH, SCHEMA_DOMAIN } from './constants';
 import { createDebug } from './debug';
+import { createConfigError } from './errors';
 
 const debug = createDebug('schemas');
 
@@ -12,7 +13,7 @@ function loadSpecificSchema(relativePath: string): JSONSchema {
   const fullPath = path.join(SCHEMA_BASE_PATH, relativePath + '.schema.json');
 
   if (!fs.existsSync(fullPath)) {
-    throw new Error(`Schema file not found: ${fullPath}`);
+    throw createConfigError(`schemaNotFoundError`, `Schema not found at path`, { schemaPath: fullPath });
   }
 
   return JSON.parse(fs.readFileSync(fullPath, { encoding: 'utf-8' })) as JSONSchema;

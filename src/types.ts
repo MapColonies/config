@@ -31,19 +31,19 @@ export interface ServerCapabilities {
 export const optionsSchema = Type.Object({
   configName: Type.String(),
   version: Type.Union([Type.Literal('latest'), Type.Number()], { default: 'latest' }),
-  configServerUrl: Type.String({default: 'http://localhost:8080', pattern: '^https?://.*$'}),
-  offlineMode: Type.Boolean({default: false}),
-  ignoreServerIsOlderVersionError: Type.Boolean({default: false}),
+  configServerUrl: Type.String({ default: 'http://localhost:8080', pattern: '^https?://.*$' }),
+  offlineMode: Type.Boolean({ default: false }),
+  ignoreServerIsOlderVersionError: Type.Boolean({ default: false }),
   // token: Type.Optional(Type.String()),
 });
 
 export type BaseOptions = Static<typeof optionsSchema>;
 
 export type ConfigOptions<
-T extends JSONSchema & {
-  [typeSymbol]: unknown;
-}
-> =  {
+  T extends JSONSchema & {
+    [typeSymbol]: unknown;
+  }
+> = {
   schema: T;
 } & BaseOptions;
 
@@ -60,5 +60,4 @@ export interface ConfigReturnType<
     envConfig: object;
   };
   getResolvedOptions: () => BaseOptions;
-
 }

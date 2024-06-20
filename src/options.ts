@@ -1,7 +1,8 @@
 import deepmerge from 'deepmerge';
 import { BaseOptions, optionsSchema } from './types';
-import { ajvLibraryConfigValidator } from './validator';
+import { ajvLibraryConfigValidator, validate } from './validator';
 import { createDebug } from './debug';
+import { createConfigError } from './errors';
 
 const debug = createDebug('options');
 
@@ -15,16 +16,20 @@ const envOptions: Record<keyof BaseOptions, string | undefined> = {
 
 let baseOptions: BaseOptions | undefined = undefined;
 
-export function initializeOptions(options: Partial<BaseOptions>):BaseOptions {
+export function initializeOptions(options: Partial<BaseOptions>): BaseOptions {
   const mergedOptions = deepmerge(options, envOptions);
 
-  const isValid = ajvLibraryConfigValidator.validate(optionsSchema, mergedOptions);
+  const [error, validatedOptions] = validate(ajvLibraryConfigValidator, optionsSchema, mergedOptions);
 
-  if (!isValid) {
-    throw new Error('Invalid config');
+  if (error) {
+    throw createConfigError(
+      'optionValidationError',
+      'An error occurred while validating the given options. please check both arguments and environment variables',
+      error
+    );
   }
 
-  baseOptions = mergedOptions as BaseOptions;
+  baseOptions = validatedOptions as BaseOptions;
   return baseOptions;
 }
 
@@ -32,6 +37,6 @@ export function getOptions(): BaseOptions {
   if (baseOptions === undefined) {
     throw new Error('Config not initialized');
   }
-  
+
   return baseOptions;
 }

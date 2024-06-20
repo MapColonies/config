@@ -1,3 +1,8 @@
+import { readPackageJsonSync } from '@map-colonies/read-pkg';
+
+const schemasPackagePathBuildPath = require.resolve('@map-colonies/schemas').substring(0, require.resolve('@map-colonies/schemas').indexOf('build'));
+export const LOCAL_SCHEMAS_PACKAGE_VERSION = readPackageJsonSync(schemasPackagePathBuildPath + 'package.json').version as string;
+
 export const SCHEMA_DOMAIN = 'https://mapcolonies.com/';
 
 export const SCHEMAS_PACKAGE_RESOLVED_PATH = require.resolve('@map-colonies/schemas');

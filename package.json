@@ -42,6 +42,7 @@
   ],
   "homepage": "https://github.com/MapColonies/config#readme",
   "dependencies": {
+    "@apideck/better-ajv-errors": "^0.3.6",
     "@apidevtools/json-schema-ref-parser": "^11.6.4",
     "@map-colonies/read-pkg": "^0.0.1",
     "@map-colonies/schemas": "0.1.0",

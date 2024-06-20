@@ -1,5 +1,14 @@
-export const configErrors = {
-  optionValidationError: { code: 400, payload: undefined },
+import { ValidationError } from '@apideck/better-ajv-errors';
+import { Dispatcher } from 'undici';
+
+const configErrors = {
+  optionValidationError: { code: 1, payload: [] as ValidationError[] },
+  configValidationError: { code: 2, payload: [] as ValidationError[] },
+  httpResponseError: { code: 3, payload: {} as Pick<Dispatcher.ResponseData, 'headers' | 'statusCode'> & { body: string } },
+  httpGeneralError: { code: 4, payload: {} as Error },
+  schemaNotFoundError: { code: 5, payload: {} as { schemaPath: string } },
+  schemasPackageVersionMismatchError: { code: 6, payload: {} as { remotePackageVersion: string; localPackageVersion: string } },
+  schemaVersionMismatchError: { code: 7, payload: {} as { remoteSchemaVersion: string; localSchemaVersion: string } },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as const satisfies Record<string, { code: number; payload: any }>;
 
@@ -15,7 +24,7 @@ export class ConfigError<ErrorName extends keyof ConfigErrors, Payload = ConfigE
   }
 }
 
-export function createConfigError<ErrorName extends keyof ConfigErrors, Payload = ConfigErrors[ErrorName]['payload']>(
+export function createConfigError<ErrorName extends keyof ConfigErrors, Payload extends ConfigErrors[ErrorName]['payload']>(
   name: ErrorName,
   message: string,
   payload: Payload
