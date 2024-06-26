@@ -12,11 +12,27 @@ const configErrors = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as const satisfies Record<string, { code: number; payload: any }>;
 
+/**
+ * Represents the configuration errors.
+ */
 export type ConfigErrors = typeof configErrors;
 
+/**
+ * Represents an error specific to the configuration module.
+ *
+ * @template ErrorName - The name of the error.
+ * @template Payload - The payload type associated with the error.
+ */
 export class ConfigError<ErrorName extends keyof ConfigErrors, Payload = ConfigErrors[ErrorName]['payload']> extends Error {
   public readonly code: ConfigErrors[ErrorName]['code'];
 
+  /**
+   * Creates a new instance of the ConfigError class.
+   *
+   * @param name - The name of the error.
+   * @param message - The error message.
+   * @param payload - The payload associated with the error.
+   */
   public constructor(name: ErrorName, message: string, public readonly payload: Payload | undefined) {
     super(message);
     this.name = name;

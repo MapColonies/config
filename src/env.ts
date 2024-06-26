@@ -1,7 +1,7 @@
 import { JSONSchema } from '@apidevtools/json-schema-ref-parser';
-import _ from 'lodash';
+import lodash from 'lodash';
 import { EnvMap, EnvType } from './types';
-import { createDebug } from './debug';
+import { createDebug } from './utils/debug';
 
 const debug = createDebug('env');
 
@@ -15,7 +15,7 @@ export function parseSchemaEnv(schema: JSONSchema): EnvMap {
     debug('handling primitive %s at path %s', type, path);
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const xFrom = (schema as { 'x-env-value'?: string })['x-env-value'];
-    debug('value of of xFrom: %s as path %s', xFrom, path);
+    debug('value of xFrom: %s as path %s', xFrom, path);
     if (xFrom !== undefined) {
       fromEnv[xFrom] = {
         type,
@@ -91,7 +91,7 @@ export function getEnvValues(schema: JSONSchema): object {
           value = unparsedValue;
       }
 
-      _.set(res, details.path, value);
+      lodash.set(res, details.path, value);
     }
   }
 

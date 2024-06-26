@@ -45,8 +45,6 @@
     "@apideck/better-ajv-errors": "^0.3.6",
     "@apidevtools/json-schema-ref-parser": "^11.6.4",
     "@map-colonies/read-pkg": "^0.0.1",
-    "@map-colonies/schemas": "0.1.0",
-    "@sinclair/typebox": "^0.32.33",
     "ajv": "^8.16.0",
     "ajv-formats": "^3.0.1",
     "config": "^3.3.11",
@@ -56,6 +54,9 @@
     "lodash": "^4.17.21",
     "semver": "^7.6.2",
     "undici": "^6.18.2"
+  },
+  "peerDependencies": {
+    "@map-colonies/schemas": "^0.2.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",

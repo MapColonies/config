@@ -1,7 +1,7 @@
 import deepmerge from 'deepmerge';
 import { BaseOptions, optionsSchema } from './types';
 import { ajvLibraryConfigValidator, validate } from './validator';
-import { createDebug } from './debug';
+import { createDebug } from './utils/debug';
 import { createConfigError } from './errors';
 
 const debug = createDebug('options');

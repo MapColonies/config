@@ -3,7 +3,7 @@ import { Dispatcher, request } from 'undici';
 import StatusCodes from 'http-status-codes';
 import { getOptions } from './options';
 import { Config, ServerCapabilities } from './types';
-import { createDebug } from './debug';
+import { createDebug } from './utils/debug';
 import { ConfigError, ConfigErrors, createConfigError } from './errors';
 
 const debug = createDebug('httpClient');

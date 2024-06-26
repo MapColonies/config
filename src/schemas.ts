@@ -2,7 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import $RefParser, { JSONSchema } from '@apidevtools/json-schema-ref-parser';
 import { SCHEMA_BASE_PATH, SCHEMA_DOMAIN } from './constants';
-import { createDebug } from './debug';
+import { createDebug } from './utils/debug';
 import { createConfigError } from './errors';
 
 const debug = createDebug('schemas');

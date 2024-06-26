@@ -1,17 +1,15 @@
-import assert from 'node:assert';
 import deepmerge from 'deepmerge';
 import { typeSymbol } from '@map-colonies/schemas/build/schemas/symbol';
 import configPkg from 'config';
 import semver from 'semver';
-import _, { type GetFieldType } from 'lodash';
-import { JSONSchema } from '@apidevtools/json-schema-ref-parser';
+import lodash, { type GetFieldType } from 'lodash';
 import { getEnvValues } from './env';
 import { BaseOptions, ConfigOptions, ConfigReturnType } from './types';
 import { loadSchema } from './schemas';
 import { getOptions, initializeOptions } from './options';
 import { getRemoteConfig, getServerCapabilities } from './httpClient';
 import { ajvConfigValidator, validate } from './validator';
-import { createDebug } from './debug';
+import { createDebug } from './utils/debug';
 import { LOCAL_SCHEMAS_PACKAGE_VERSION } from './constants';
 import { createConfigError } from './errors';
 
@@ -20,7 +18,14 @@ const debug = createDebug('config');
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 const arrayMerge: deepmerge.Options['arrayMerge'] = (destinationArray, sourceArray) => sourceArray;
 
-export async function config<T extends JSONSchema & { [typeSymbol]: unknown }>(options: ConfigOptions<T>): Promise<ConfigReturnType<T>> {
+/**
+ * Retrieves the configuration based on the provided options.
+ *
+ * @template T - The type of the configuration schema.
+ * @param {ConfigOptions<T>} options - The options for retrieving the configuration.
+ * @returns {Promise<ConfigReturnType<T>>} - A promise that resolves to the configuration object.
+ */
+export async function config<T extends { [typeSymbol]: unknown; $id?: string }>(options: ConfigOptions<T>): Promise<ConfigReturnType<T>> {
   // handle package options
   debug('config called with options: %j', options);
   const { schema: baseSchema, ...unvalidatedOptions } = options;
@@ -29,12 +34,12 @@ export async function config<T extends JSONSchema & { [typeSymbol]: unknown }>(o
   let remoteConfig: object | T = {};
 
   // handle remote config
-  if (!offlineMode) {
+  if (offlineMode !== true) {
     debug('handling fetching remote data');
     // check if the server is using an older version of the schemas package
     const capabilitiesResponse = await getServerCapabilities();
 
-    if (!ignoreServerIsOlderVersionError && semver.gt(LOCAL_SCHEMAS_PACKAGE_VERSION, capabilitiesResponse.schemasPackageVersion)) {
+    if (ignoreServerIsOlderVersionError !== true && semver.gt(LOCAL_SCHEMAS_PACKAGE_VERSION, capabilitiesResponse.schemasPackageVersion)) {
       debug(
         'server is using an older version of the schemas package. local: %s, remote: %s',
         LOCAL_SCHEMAS_PACKAGE_VERSION,
@@ -96,7 +101,7 @@ export async function config<T extends JSONSchema & { [typeSymbol]: unknown }>(o
   function get<TPath extends string>(path: TPath): GetFieldType<T[typeof typeSymbol], TPath> {
     debug('get called with path: %s', path);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return _.get(validatedConfig as (typeof baseSchema)[typeof typeSymbol], path);
+    return lodash.get(validatedConfig as (typeof baseSchema)[typeof typeSymbol], path);
   }
 
   function getAll(): ReturnType<ConfigReturnType<T>['getAll']> {

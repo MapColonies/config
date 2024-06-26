@@ -1,6 +1,11 @@
 import { JSONSchema } from '@apidevtools/json-schema-ref-parser';
 import { typeSymbol } from '@map-colonies/schemas/build/schemas/symbol';
-import { Static, Type } from '@sinclair/typebox';
+import { JSONSchemaType } from 'ajv';
+
+type Prettify<T> = {
+  [K in keyof T]: T[K];
+  // eslint-disable-next-line @typescript-eslint/ban-types
+} & {};
 
 export type EnvType = 'number' | 'string' | 'boolean' | 'integer' | 'null';
 
@@ -28,36 +33,103 @@ export interface ServerCapabilities {
   pubSubEnabled: boolean;
 }
 
-export const optionsSchema = Type.Object({
-  configName: Type.String(),
-  version: Type.Union([Type.Literal('latest'), Type.Number()], { default: 'latest' }),
-  configServerUrl: Type.String({ default: 'http://localhost:8080', pattern: '^https?://.*$' }),
-  offlineMode: Type.Boolean({ default: false }),
-  ignoreServerIsOlderVersionError: Type.Boolean({ default: false }),
-  // token: Type.Optional(Type.String()),
-});
+export interface SchemaWithType {
+  $id?: string;
+  [typeSymbol]: unknown;
+}
 
-export type BaseOptions = Static<typeof optionsSchema>;
+/**
+ * Represents the base options for configuration.
+ */
+export interface BaseOptions {
+  /**
+   * The name of the remote configuration.
+   */
+  configName: string;
+  /**
+   * The version of the remote configuration. It can be either 'latest' or a number.
+   */
+  version: 'latest' | number;
+  /**
+   * The URL of the configuration server.
+   */
+  configServerUrl: string;
+  /**
+   * Indicates whether the configuration should be loaded in offline mode.
+   */
+  offlineMode?: boolean;
+  /**
+   * Indicates whether to ignore the error when the server version is older than the requested version.
+   */
+  ignoreServerIsOlderVersionError?: boolean;
+}
 
-export type ConfigOptions<
-  T extends JSONSchema & {
-    [typeSymbol]: unknown;
+/**
+ * Represents the options for configuration.
+ */
+export type ConfigOptions<T extends SchemaWithType> = Prettify<
+  BaseOptions & {
+    /**
+     * The schema of the configuration object.
+     */
+    schema: T;
   }
-> = {
-  schema: T;
-} & BaseOptions;
+>;
 
+export const optionsSchema: JSONSchemaType<BaseOptions> = {
+  required: ['configName', 'configServerUrl', 'version'],
+  additionalProperties: false,
+  type: 'object',
+  properties: {
+    configName: { type: 'string' },
+    version: {
+      oneOf: [
+        { type: 'string', const: 'latest' },
+        { type: 'integer', minimum: 1 },
+      ],
+    },
+    configServerUrl: { type: 'string' },
+    offlineMode: { type: 'boolean', nullable: true },
+    ignoreServerIsOlderVersionError: { type: 'boolean', nullable: true },
+  },
+};
+
+/**
+ * Represents the schema of the configuration object.
+ * @template T - The type of the configuration schema.
+ */
 export interface ConfigReturnType<
   T extends JSONSchema & {
     [typeSymbol]: unknown;
   }
 > {
+  /**
+   * Retrieves the value at the specified path from the configuration object.
+   * @template TPath - The type of the path.
+   * @param path - The path to the desired value.
+   * @returns The value at the specified path.
+   */
   get: <TPath extends string>(path: TPath) => _.GetFieldType<T[typeof typeSymbol], TPath>;
+
+  /**
+   * Retrieves the entire configuration object.
+   * @returns The entire configuration object.
+   */
   getAll: () => T[typeof typeSymbol];
+
+  /**
+   * Retrieves different parts of the configuration object before being merged and validated.
+   * @returns An object containing the localConfig, config, and envConfig parts of the configuration.
+   */
   getConfigParts: () => {
     localConfig: object;
     config: object;
     envConfig: object;
   };
+
+  /**
+   * Retrieves the resolved options from the configuration object.
+   * @returns The resolved options.
+   */
   getResolvedOptions: () => BaseOptions;
 }

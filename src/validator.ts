@@ -1,9 +1,8 @@
-import Ajv from 'ajv';
+import Ajv, { Schema } from 'ajv';
 import addFormats from 'ajv-formats';
-import { JSONSchema } from '@apidevtools/json-schema-ref-parser';
-import _ from 'lodash';
+import lodash from 'lodash';
 import { ValidationError, betterAjvErrors } from '@apideck/better-ajv-errors';
-import { createDebug } from './debug';
+import { createDebug } from './utils/debug';
 
 const debug = createDebug('validator');
 
@@ -23,10 +22,13 @@ export const ajvLibraryConfigValidator = new Ajv({
   verbose: true,
 });
 
-export function validate<T>(ajv: Ajv, schema: JSONSchema, data: unknown): [ValidationError[], undefined] | [undefined, T] {
+export function validate<T>(ajv: Ajv, schema: Schema, data: unknown): [ValidationError[], undefined] | [undefined, T] {
+  if (typeof schema === 'boolean') {
+    throw new Error('Schema must be an object');
+  }
   debug('validating data %j with schema %s', data, schema.$id);
 
-  const clonedData = _.cloneDeep(data);
+  const clonedData = lodash.cloneDeep(data);
   const valid = ajv.validate(schema, clonedData);
   if (!valid) {
     debug('validation failed with errors %j', ajv.errors);
