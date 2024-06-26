@@ -98,7 +98,7 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
  * Represents the schema of the configuration object.
  * @template T - The type of the configuration schema.
  */
-export interface ConfigReturnType<
+export interface ConfigInstance<
   T extends JSONSchema & {
     [typeSymbol]: unknown;
   }

@@ -4,7 +4,7 @@ import configPkg from 'config';
 import semver from 'semver';
 import lodash, { type GetFieldType } from 'lodash';
 import { getEnvValues } from './env';
-import { BaseOptions, ConfigOptions, ConfigReturnType } from './types';
+import { BaseOptions, ConfigOptions, ConfigInstance } from './types';
 import { loadSchema } from './schemas';
 import { getOptions, initializeOptions } from './options';
 import { getRemoteConfig, getServerCapabilities } from './httpClient';
@@ -23,9 +23,9 @@ const arrayMerge: deepmerge.Options['arrayMerge'] = (destinationArray, sourceArr
  *
  * @template T - The type of the configuration schema.
  * @param {ConfigOptions<T>} options - The options for retrieving the configuration.
- * @returns {Promise<ConfigReturnType<T>>} - A promise that resolves to the configuration object.
+ * @returns {Promise<ConfigInstance<T>>} - A promise that resolves to the configuration object.
  */
-export async function config<T extends { [typeSymbol]: unknown; $id?: string }>(options: ConfigOptions<T>): Promise<ConfigReturnType<T>> {
+export async function config<T extends { [typeSymbol]: unknown; $id?: string }>(options: ConfigOptions<T>): Promise<ConfigInstance<T>> {
   // handle package options
   debug('config called with options: %j', options);
   const { schema: baseSchema, ...unvalidatedOptions } = options;
@@ -104,12 +104,12 @@ export async function config<T extends { [typeSymbol]: unknown; $id?: string }>(
     return lodash.get(validatedConfig as (typeof baseSchema)[typeof typeSymbol], path);
   }
 
-  function getAll(): ReturnType<ConfigReturnType<T>['getAll']> {
+  function getAll(): ReturnType<ConfigInstance<T>['getAll']> {
     debug('getAll called');
     return validatedConfig;
   }
 
-  function getConfigParts(): ReturnType<ConfigReturnType<T>['getConfigParts']> {
+  function getConfigParts(): ReturnType<ConfigInstance<T>['getConfigParts']> {
     debug('getConfigParts called');
     return {
       localConfig,
