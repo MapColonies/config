@@ -97,20 +97,20 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
  * Represents the schema of the configuration object.
  * @template T - The type of the configuration schema.
  */
-export interface ConfigInstance<T extends SchemaWithType> {
+export interface ConfigInstance<T> {
   /**
    * Retrieves the value at the specified path from the configuration object.
    * @template TPath - The type of the path.
    * @param path - The path to the desired value.
    * @returns The value at the specified path.
    */
-  get: <TPath extends string>(path: TPath) => _.GetFieldType<T[typeof typeSymbol], TPath>;
+  get: <TPath extends string>(path: TPath) => _.GetFieldType<T, TPath>;
 
   /**
    * Retrieves the entire configuration object.
    * @returns The entire configuration object.
    */
-  getAll: () => T[typeof typeSymbol];
+  getAll: () => T;
 
   /**
    * Retrieves different parts of the configuration object before being merged and validated.

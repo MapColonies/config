@@ -25,7 +25,9 @@ const arrayMerge: deepmerge.Options['arrayMerge'] = (destinationArray, sourceArr
  * @param {ConfigOptions<T>} options - The options for retrieving the configuration.
  * @returns {Promise<ConfigInstance<T>>} - A promise that resolves to the configuration object.
  */
-export async function config<T extends { [typeSymbol]: unknown; $id?: string }>(options: ConfigOptions<T>): Promise<ConfigInstance<T>> {
+export async function config<T extends { [typeSymbol]: unknown; $id?: string }>(
+  options: ConfigOptions<T>
+): Promise<ConfigInstance<T[typeof typeSymbol]>> {
   // handle package options
   debug('config called with options: %j', options);
   const { schema: baseSchema, ...unvalidatedOptions } = options;
@@ -104,7 +106,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id?: string }>(
     return lodash.get(validatedConfig as (typeof baseSchema)[typeof typeSymbol], path);
   }
 
-  function getAll(): ReturnType<ConfigInstance<T>['getAll']> {
+  function getAll(): ReturnType<ConfigInstance<T[typeof typeSymbol]>['getAll']> {
     debug('getAll called');
     return validatedConfig;
   }
