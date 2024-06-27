@@ -1,4 +1,3 @@
-import { JSONSchema } from '@apidevtools/json-schema-ref-parser';
 import { typeSymbol } from '@map-colonies/schemas/build/schemas/symbol';
 import { JSONSchemaType } from 'ajv';
 
@@ -98,11 +97,7 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
  * Represents the schema of the configuration object.
  * @template T - The type of the configuration schema.
  */
-export interface ConfigInstance<
-  T extends JSONSchema & {
-    [typeSymbol]: unknown;
-  }
-> {
+export interface ConfigInstance<T extends SchemaWithType> {
   /**
    * Retrieves the value at the specified path from the configuration object.
    * @template TPath - The type of the path.
