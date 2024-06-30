@@ -1,6 +1,6 @@
 import deepmerge from 'deepmerge';
 import { BaseOptions, optionsSchema } from './types';
-import { ajvLibraryConfigValidator, validate } from './validator';
+import { ajvOptionsValidator, validate } from './validator';
 import { createDebug } from './utils/debug';
 import { createConfigError } from './errors';
 
@@ -29,7 +29,7 @@ export function initializeOptions(options: Partial<BaseOptions>): BaseOptions {
 
   debug('merged options: %j', mergedOptions);
 
-  const [errors, validatedOptions] = validate(ajvLibraryConfigValidator, optionsSchema, mergedOptions);
+  const [errors, validatedOptions] = validate(ajvOptionsValidator, optionsSchema, mergedOptions);
 
   if (errors) {
     debug('error validating options: %s', errors[0].message);

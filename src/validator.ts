@@ -16,7 +16,7 @@ export const ajvConfigValidator = addFormats(
   ['date-time', 'time', 'date', 'email', 'hostname', 'ipv4', 'ipv6', 'uri', 'uuid', 'regex', 'uri-template']
 );
 
-export const ajvLibraryOptionsValidator = new Ajv({
+export const ajvOptionsValidator = new Ajv({
   useDefaults: true,
   coerceTypes: true,
   allErrors: true,
