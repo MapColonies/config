@@ -6,13 +6,20 @@ import { createConfigError } from './errors';
 
 const debug = createDebug('options');
 
-const envOptions: Record<keyof BaseOptions, string | undefined> = {
+const envOptions: Partial<Record<keyof BaseOptions, string>> = {
   configName: process.env.CONFIG_NAME,
   configServerUrl: process.env.CONFIG_SERVER_URL,
   version: process.env.CONFIG_VERSION,
   offlineMode: process.env.CONFIG_OFFLINE_MODE,
   ignoreServerIsOlderVersionError: process.env.CONFIG_IGNORE_SERVER_IS_OLDER_VERSION_ERROR,
 };
+
+// in order to merge correctly the keys should not exist, undefined is not enough
+for (const key in envOptions) {
+  if (envOptions[key as keyof BaseOptions] === undefined) {
+    delete envOptions[key as keyof BaseOptions];
+  }
+}
 
 let baseOptions: BaseOptions | undefined = undefined;
 
