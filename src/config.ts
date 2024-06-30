@@ -29,7 +29,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id?: string }>(
   options: ConfigOptions<T>
 ): Promise<ConfigInstance<T[typeof typeSymbol]>> {
   // handle package options
-  debug('config called with options: %j', options);
+  debug('config called with options: %j', { ...options, schema: options.schema.$id });
   const { schema: baseSchema, ...unvalidatedOptions } = options;
   const { configName, offlineMode, version, ignoreServerIsOlderVersionError } = initializeOptions(unvalidatedOptions);
 
