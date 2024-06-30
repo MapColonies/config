@@ -11,16 +11,16 @@ export const ajvConfigValidator = addFormats(
     useDefaults: true,
     allErrors: true,
     verbose: true,
+    keywords: ['x-env-value'],
   }),
   ['date-time', 'time', 'date', 'email', 'hostname', 'ipv4', 'ipv6', 'uri', 'uuid', 'regex', 'uri-template']
 );
 
-export const ajvLibraryConfigValidator = new Ajv({
+export const ajvLibraryOptionsValidator = new Ajv({
   useDefaults: true,
   coerceTypes: true,
   allErrors: true,
   verbose: true,
-  keywords: ['x-env-value'],
 });
 
 export function validate<T>(ajv: Ajv, schema: Schema, data: unknown): [ValidationError[], undefined] | [undefined, T] {
