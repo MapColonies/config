@@ -20,6 +20,7 @@ export const ajvLibraryConfigValidator = new Ajv({
   coerceTypes: true,
   allErrors: true,
   verbose: true,
+  keywords: ['x-env-value'],
 });
 
 export function validate<T>(ajv: Ajv, schema: Schema, data: unknown): [ValidationError[], undefined] | [undefined, T] {
