@@ -78,7 +78,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id?: string }>(
 
   const dereferencedSchema = await loadSchema(baseSchema);
 
-  const localConfig = configPkg.util.loadFileConfigs('../config') as { [key: string]: unknown };
+  const localConfig = configPkg.util.loadFileConfigs(options.localConfigPath) as { [key: string]: unknown };
   debug('local config: %j', localConfig);
 
   const envConfig = getEnvValues(dereferencedSchema);

@@ -61,6 +61,11 @@ export interface BaseOptions {
    * Indicates whether to ignore the error when the server version is older than the requested version.
    */
   ignoreServerIsOlderVersionError?: boolean;
+  /**
+   * The path to the local configuration folder.
+   * @default './config'
+   */
+  localConfigPath: string;
 }
 
 /**
@@ -90,6 +95,7 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
     configServerUrl: { type: 'string' },
     offlineMode: { type: 'boolean', nullable: true },
     ignoreServerIsOlderVersionError: { type: 'boolean', nullable: true },
+    localConfigPath: { type: 'string', default: './config' },
   },
 };
 
