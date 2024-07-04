@@ -6,7 +6,7 @@ import { Config, ServerCapabilities } from './types';
 import { createDebug } from './utils/debug';
 import { ConfigError, ConfigErrors, createConfigError } from './errors';
 
-const debug = createDebug('httpClient');
+const debug = createDebug('http');
 
 async function createHttpErrorPayload(res: Dispatcher.ResponseData): Promise<ConfigErrors['httpResponseError']['payload']> {
   return {
