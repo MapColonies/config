@@ -16,10 +16,10 @@ async function createHttpErrorPayload(res: Dispatcher.ResponseData): Promise<Con
   };
 }
 
-async function requestWrapper(url: string): Promise<Dispatcher.ResponseData> {
+async function requestWrapper(url: string, query?: Record<string, unknown>): Promise<Dispatcher.ResponseData> {
   debug('Making request to %s', url);
   try {
-    const res = await request(url);
+    const res = await request(url, { query });
     if (res.statusCode > StatusCodes.NOT_FOUND) {
       debug('Failed to fetch config. Status code: %d', res.statusCode);
       throw createConfigError('httpResponseError', 'Failed to fetch config', await createHttpErrorPayload(res));
@@ -38,7 +38,7 @@ export async function getRemoteConfig(configName: string, version: number | 'lat
   debug('Fetching remote config %s@%s', configName, version);
   const { configServerUrl } = getOptions();
   const url = `${configServerUrl}/config/${configName}/${version}`;
-  const res = await requestWrapper(url);
+  const res = await requestWrapper(url, { shouldDereference: true });
 
   if (res.statusCode === StatusCodes.BAD_REQUEST) {
     debug('Invalid request to getConfig');
