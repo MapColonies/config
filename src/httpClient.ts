@@ -1,4 +1,3 @@
-import assert from 'node:assert';
 import { Dispatcher, request } from 'undici';
 import StatusCodes from 'http-status-codes';
 import { getOptions } from './options';

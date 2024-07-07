@@ -4,6 +4,7 @@
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "module": "NodeNext",
+    "esModuleInterop": true,
     "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
     "outDir": "dist",
