@@ -4,7 +4,7 @@ module.exports = {
   },
   coverageReporters: ['text', 'html'],
   collectCoverage: true,
-  collectCoverageFrom: ['<rootDir>/src/**/*.ts', '!*/node_modules/', '!/vendor/**', '!*/common/**', '!**/models/**', '!<rootDir>/src/*'],
+  collectCoverageFrom: ['<rootDir>/src/**/*.ts', '!*/node_modules/', '!/vendor/**', '!<rootDir>/src/index.ts'],
   coverageDirectory: '<rootDir>/coverage',
   rootDir: '../../.',
   testMatch: ['<rootDir>/tests/**/*.spec.ts'],

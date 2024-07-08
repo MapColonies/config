@@ -6,27 +6,24 @@ import { createConfigError } from './errors';
 
 const debug = createDebug('options');
 
-function getEnvOptions(): Partial<Record<keyof BaseOptions, string>> {
-  const envOptions: Partial<Record<keyof BaseOptions, string>> = {
-    configName: process.env.CONFIG_NAME,
-    configServerUrl: process.env.CONFIG_SERVER_URL,
-    version: process.env.CONFIG_VERSION,
-    offlineMode: process.env.CONFIG_OFFLINE_MODE,
-    ignoreServerIsOlderVersionError: process.env.CONFIG_IGNORE_SERVER_IS_OLDER_VERSION_ERROR,
-  };
+const envOptions: Partial<Record<keyof BaseOptions, string>> = {
+  configName: process.env.CONFIG_NAME,
+  configServerUrl: process.env.CONFIG_SERVER_URL,
+  version: process.env.CONFIG_VERSION,
+  offlineMode: process.env.CONFIG_OFFLINE_MODE,
+  ignoreServerIsOlderVersionError: process.env.CONFIG_IGNORE_SERVER_IS_OLDER_VERSION_ERROR,
+};
 
-  // in order to merge correctly the keys should not exist, undefined is not enough
-  for (const key in envOptions) {
-    if (envOptions[key as keyof BaseOptions] === undefined) {
-      delete envOptions[key as keyof BaseOptions];
-    }
+// in order to merge correctly the keys should not exist, undefined is not enough
+for (const key in envOptions) {
+  if (envOptions[key as keyof BaseOptions] === undefined) {
+    delete envOptions[key as keyof BaseOptions];
   }
-  return envOptions;
 }
+
 let baseOptions: BaseOptions | undefined = undefined;
 
 export function initializeOptions(options: Partial<BaseOptions>): BaseOptions {
-  const envOptions = getEnvOptions();
   debug('initializing options with %j and env %j', options, envOptions);
   const mergedOptions = deepmerge(options, envOptions);
 

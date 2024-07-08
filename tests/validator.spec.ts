@@ -60,5 +60,14 @@ describe('validator', () => {
       expect(errors).toBeUndefined();
       expect(validatedData).toEqual({ foo: 1 });
     });
+
+    it('should throw an error if the schema is an boolean', () => {
+      const schema = true;
+      const data = {};
+
+      const action = () => validate(ajvOptionsValidator, schema, data);
+      
+      expect(action).toThrow()
+    });
   });
 });

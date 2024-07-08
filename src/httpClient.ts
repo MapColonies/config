@@ -21,7 +21,7 @@ async function requestWrapper(url: string, query?: Record<string, unknown>): Pro
     const res = await request(url, { query });
     if (res.statusCode > StatusCodes.NOT_FOUND) {
       debug('Failed to fetch config. Status code: %d', res.statusCode);
-      throw createConfigError('httpResponseError', 'Failed to fetch config', await createHttpErrorPayload(res));
+      throw createConfigError('httpResponseError', 'Failed to fetch', await createHttpErrorPayload(res));
     }
     return res;
   } catch (error) {

@@ -7,7 +7,7 @@ const debug = createDebug('env');
 
 const schemaCompositionKeys = ['oneOf', 'anyOf', 'allOf'] as const;
 
-export function parseSchemaEnv(schema: JSONSchema): EnvMap {
+function parseSchemaEnv(schema: JSONSchema): EnvMap {
   debug('parsing schema for env values');
   const fromEnv: EnvMap = {};
 
@@ -27,7 +27,7 @@ export function parseSchemaEnv(schema: JSONSchema): EnvMap {
   function iterateOverSchemaObject(schema: JSONSchema, path: string): void {
     debug('iterating over schema object at path %s', path);
     const type = schema.type;
-    if (type === 'number' || type === 'string' || type === 'boolean' || type === 'integer' || type === 'null') {
+    if (type === 'number' || type === 'string' || type === 'boolean' || type === 'integer' || type === 'null') {      
       return handlePrimitive(schema, type, path);
     }
 
@@ -76,7 +76,7 @@ export function getEnvValues(schema: JSONSchema): object {
 
       switch (details.type) {
         case 'boolean':
-          value = value === 'true';
+          value = unparsedValue.toLowerCase() === 'true';
           break;
         case 'integer':
           value = parseInt(unparsedValue);

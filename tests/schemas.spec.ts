@@ -51,14 +51,23 @@ describe('schemas', () => {
 
       const dereferencedSchema = await loadSchema(schema);
 
-      expect(dereferencedSchema).toEqual({
-        $id: 'https://mapcolonies.com/test',
+      expect(dereferencedSchema).toHaveProperty('allOf[0].$id', 'https://mapcolonies.com/common/db/partial/v1');
+    });
+
+    it('should throw an error if the schema is not found', async () => {
+      const schema = {
+        $id: 'https://mapcolonies.com/base',
         type: 'object',
         properties: {
           foo: { type: 'string' },
+          bar: { $ref: 'https://mapcolonies.com/not-found' },
         },
         required: ['foo'],
-      });
+      } satisfies JSONSchema;
+
+      const promise = loadSchema(schema);
+
+      await expect(promise).rejects.toThrow();
     });
   });
 });

@@ -16,7 +16,7 @@
     "prelint": "npm run format",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "jest --config=./tests/configurations/jest.config.js",
+    "test": "SUPPRESS_NO_CONFIG_WARNING=true jest --config=./tests/configurations/jest.config.js",
     "prebuild": "npm run clean",
     "build": "tsc --project tsconfig.build.json",
     "start": "npm run build && cd dist && node ./index.js",
