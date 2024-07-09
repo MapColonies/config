@@ -27,7 +27,7 @@ function parseSchemaEnv(schema: JSONSchema): EnvMap {
   function iterateOverSchemaObject(schema: JSONSchema, path: string): void {
     debug('iterating over schema object at path %s', path);
     const type = schema.type;
-    if (type === 'number' || type === 'string' || type === 'boolean' || type === 'integer' || type === 'null') {      
+    if (type === 'number' || type === 'string' || type === 'boolean' || type === 'integer' || type === 'null') {
       return handlePrimitive(schema, type, path);
     }
 

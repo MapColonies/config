@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { satisfies } from 'semver';
 import { JSONSchema } from '@apidevtools/json-schema-ref-parser';
 import { getEnvValues } from '../src/env';
 import { EnvType } from '../src/types';
@@ -74,7 +73,7 @@ describe('env', () => {
       const schema = {
         type: 'object',
         properties: {
-          foo: { type: 'array', 'x-env-value': 'FOO', items: { type: 'string', 'x-env-value': "BAZ" } },
+          foo: { type: 'array', 'x-env-value': 'FOO', items: { type: 'string', 'x-env-value': 'BAZ' } },
         },
         required: ['foo'],
       } satisfies JSONSchema;

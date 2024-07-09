@@ -1,3 +1,6 @@
+/**
+ * @type {import('@jest/types').Config.InitialOptions}
+ */
 module.exports = {
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
@@ -9,7 +12,7 @@ module.exports = {
   rootDir: '../../.',
   testMatch: ['<rootDir>/tests/**/*.spec.ts'],
   // setupFiles: ['<rootDir>/tests/configurations/jest.setup.ts'],
-  // setupFilesAfterEnv: ['jest-openapi', '<rootDir>/tests/configurations/initJestOpenapi.setup.ts'],
+  // setupFiles: ['<rootDir>/tests/configurations/afterEnv.setup.ts'],
   // reporters: [
   //   'default',
   //   [
