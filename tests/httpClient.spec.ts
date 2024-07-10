@@ -77,7 +77,9 @@ describe('httpClient', () => {
     });
 
     it('should throw an error if the request fails', async () => {
-      client.intercept({ path: '/config/name/1?shouldDereference=true', method: 'GET' }).reply(StatusCodes.INTERNAL_SERVER_ERROR, 'Internal Server Error');
+      client
+        .intercept({ path: '/config/name/1?shouldDereference=true', method: 'GET' })
+        .reply(StatusCodes.INTERNAL_SERVER_ERROR, 'Internal Server Error');
 
       await expect(getRemoteConfig('name', 1)).rejects.toThrow('Failed to fetch');
     });

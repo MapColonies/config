@@ -66,8 +66,8 @@ describe('validator', () => {
       const data = {};
 
       const action = () => validate(ajvOptionsValidator, schema, data);
-      
-      expect(action).toThrow()
+
+      expect(action).toThrow();
     });
   });
 });
