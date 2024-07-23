@@ -155,7 +155,7 @@ The package supports merging configurations from multiple sources (local, remote
 
 ### Environment Variables
 
-1. Configuration options can be overridden by setting the corresponding environment variables as described in schema using the `x-env-value` key.
+Configuration options can be overridden by setting the corresponding environment variables as described in schema using the `x-env-value` key.
 
 ### Merging Configurations
 
@@ -170,8 +170,8 @@ The package supports merging configurations from multiple sources (local, remote
 
 1. After merging, the final configuration is validated against the defined schema using ajv.
 2. The validation ensures that all required properties are present, and the types and values of properties conform to the schema.
-3. Any value that is is default according to the schema is added to the final object.
-4. If validation fails, an error is thrown, indicating the invalid properties and their issues.
+3. Any default value according to the schema is added to the final object.
+4. If the validation fails, an error is thrown, indicating the invalid properties and their issues.
 
 
 # Error handling
@@ -179,7 +179,7 @@ The package supports merging configurations from multiple sources (local, remote
 This section describes the possible errors that can occur when using the package, along with their codes and payload structures.
 
 ## Identifying errors
-The package exposes a helper function called `isConfigError` to assert what is the error that was thrown and handle is as needed.
+The package exposes a helper function called `isConfigError` to assert what is the error that was thrown and handle it as needed.
 ```typescript
 import { config, isConfigError } from '@map-colonies/config';
 
@@ -220,7 +220,7 @@ try {
     body: string;
   }
   ```
-- **Description**: This error occurs when an HTTP request results in an error response. The payload includes the response headers, status code, and body.
+- **Description**: This error occurs when an HTTP request results in an error response. The payload includes the response headers, status code and body.
 
 ### `httpGeneralError`
 - **Code**: `4`
@@ -264,7 +264,7 @@ If for some reason you want to debug the package you can either use the `getConf
 
 The package debug logger is implemented using the [`debug`](https://www.npmjs.com/package/debug) npm package and is configured using the `DEBUG` Environment variable.
 
-The following are the values you can configure to to use the debug option.
+The following are the values you can configure to use the debug option.
 
 ### `DEBUG=*`
 Enables all the logs. Note that setting this option might enable debug logging of other packages.
