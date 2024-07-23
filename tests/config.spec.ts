@@ -289,7 +289,7 @@ describe('config', () => {
       await expect(promise).rejects.toThrow();
     });
 
-    it('should throw if the network request fails', async () => {
+    it('should throw an error if the network request fails', async () => {
       client.intercept({ path: '/capabilities', method: 'GET' }).replyWithError(new Error());
 
       const promise = config({

@@ -61,7 +61,7 @@ describe('validator', () => {
       expect(validatedData).toEqual({ foo: 1 });
     });
 
-    it('should throw an error if the schema is an boolean', () => {
+    it('should throw an error if the schema is boolean', () => {
       const schema = true;
       const data = {};
 
