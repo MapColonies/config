@@ -65,7 +65,7 @@ export interface BaseOptions {
    * The path to the local configuration folder.
    * @default './config'
    */
-  localConfigPath: string;
+  localConfigPath?: string;
 }
 
 /**
@@ -95,7 +95,7 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
     configServerUrl: { type: 'string' },
     offlineMode: { type: 'boolean', nullable: true },
     ignoreServerIsOlderVersionError: { type: 'boolean', nullable: true },
-    localConfigPath: { type: 'string', default: './config' },
+    localConfigPath: { type: 'string', default: './config', nullable: true },
   },
 };
 
