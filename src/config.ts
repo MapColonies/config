@@ -25,7 +25,7 @@ const arrayMerge: deepmerge.Options['arrayMerge'] = (destinationArray, sourceArr
  * @param {ConfigOptions<T>} options - The options for retrieving the configuration.
  * @returns {Promise<ConfigInstance<T>>} - A promise that resolves to the configuration object.
  */
-export async function config<T extends { [typeSymbol]: unknown; $id?: string }>(
+export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
   options: ConfigOptions<T>
 ): Promise<ConfigInstance<T[typeof typeSymbol]>> {
   // handle package options
@@ -60,13 +60,13 @@ export async function config<T extends { [typeSymbol]: unknown; $id?: string }>(
     // get the remote config
     const serverConfigResponse = await getRemoteConfig(configName, version);
 
-    if (typeof baseSchema !== 'boolean' && serverConfigResponse.schemaId !== baseSchema.$id) {
+    if (serverConfigResponse.schemaId !== baseSchema.$id) {
       debug('schema version mismatch. local: %s, remote: %s', baseSchema.$id, serverConfigResponse.schemaId);
       throw createConfigError(
         'schemaVersionMismatchError',
         'The schema version of the remote config does not match the schema version of the local config',
         {
-          localSchemaVersion: baseSchema.$id as string,
+          localSchemaVersion: baseSchema.$id,
           remoteSchemaVersion: serverConfigResponse.schemaId,
         }
       );
