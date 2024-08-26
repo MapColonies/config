@@ -2,7 +2,13 @@
   "name": "@map-colonies/config",
   "version": "0.0.1",
   "description": "Config package for MapColonies with support for central config management",
-  "main": "./dist/index.js",
+  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
@@ -10,6 +16,7 @@
     "prelint": "npm run format",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
+    "test": "cross-env SUPPRESS_NO_CONFIG_WARNING=true NODE_CONFIG_STRICT_MODE=false jest --config=./tests/configurations/jest.config.js",
     "prebuild": "npm run clean",
     "build": "tsc --project tsconfig.build.json",
     "start": "npm run build && cd dist && node ./index.js",
@@ -36,19 +43,40 @@
   ],
   "homepage": "https://github.com/MapColonies/config#readme",
   "dependencies": {
-
+    "@apideck/better-ajv-errors": "^0.3.6",
+    "@apidevtools/json-schema-ref-parser": "^11.6.4",
+    "@map-colonies/read-pkg": "^0.0.1",
+    "@types/lodash": "^4.17.0",
+    "ajv": "^8.16.0",
+    "ajv-formats": "^3.0.1",
+    "config": "^3.3.11",
+    "debug": "^4.3.5",
+    "deepmerge": "^4.3.1",
+    "http-status-codes": "^2.3.0",
+    "lodash": "^4.17.21",
+    "semver": "^7.6.2",
+    "undici": "^6.18.2"
+  },
+  "peerDependencies": {
+    "@map-colonies/schemas": "^0.2.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
     "@map-colonies/eslint-config": "^4.0.0",
+    "@types/config": "^3.3.4",
+    "@types/debug": "^4.1.12",
+    "@types/jest": "^29.5.12",
     "@types/node": "^14.14.12",
     "commitlint": "^11.0.0",
+    "cross-env": "^7.0.3",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^8.56.0",
     "husky": "^4.3.5",
+    "jest": "^29.7.0",
     "prettier": "^2.2.1",
     "pretty-quick": "^3.1.0",
+    "ts-jest": "^29.1.5",
     "typescript": "^5.4.5"
   }
 }
