@@ -17,7 +17,11 @@ function loadSpecificSchema(relativePath: string): JSONSchema {
     throw createConfigError(`schemaNotFoundError`, `Schema not found at path`, { schemaPath: fullPath });
   }
 
-  return JSON.parse(fs.readFileSync(fullPath, { encoding: 'utf-8' })) as JSONSchema;
+  const schema = JSON.parse(fs.readFileSync(fullPath, { encoding: 'utf-8' })) as JSONSchema;
+
+  delete schema.$id;
+
+  return schema;
 }
 
 export async function loadSchema(schema: JSONSchema): ReturnType<typeof refParser.dereference> {
