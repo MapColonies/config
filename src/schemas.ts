@@ -19,6 +19,7 @@ function loadSpecificSchema(relativePath: string): JSONSchema {
 
   const schema = JSON.parse(fs.readFileSync(fullPath, { encoding: 'utf-8' })) as JSONSchema;
 
+  // removed to prevent the "reference resolves to more than one schema" error from ajv
   delete schema.$id;
 
   return schema;
