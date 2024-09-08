@@ -1,4 +1,5 @@
-import Ajv, { SchemaObject } from 'ajv';
+import { readFileSync } from 'node:fs';
+import Ajv, { AnySchemaObject, SchemaObject } from 'ajv/dist/2019';
 import addFormats from 'ajv-formats';
 import lodash from 'lodash';
 import { ValidationError, betterAjvErrors } from '@apideck/better-ajv-errors';
@@ -6,15 +7,23 @@ import { createDebug } from './utils/debug';
 
 const debug = createDebug('validator');
 
-export const ajvConfigValidator = addFormats(
+const draft7MetaSchema = JSON.parse(
+  readFileSync(require.resolve('ajv/dist/refs/json-schema-draft-07.json'), { encoding: 'utf-8' })
+) as AnySchemaObject;
+
+const ajvConfigValidator = addFormats(
   new Ajv({
     useDefaults: true,
     allErrors: true,
     verbose: true,
+    discriminator: true,
     keywords: ['x-env-value'],
-  }),
-  ['date-time', 'time', 'date', 'email', 'hostname', 'ipv4', 'ipv6', 'uri', 'uuid', 'regex', 'uri-template']
+  })
 );
+
+ajvConfigValidator.addMetaSchema(draft7MetaSchema, 'http://json-schema.org/draft-07/schema#');
+
+export { ajvConfigValidator };
 
 export const ajvOptionsValidator = new Ajv({
   useDefaults: true,
