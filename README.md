@@ -71,26 +71,31 @@ This package allows you to configure various options for loading and managing co
 
 ### `schema`
 - **Type**: `T extends SchemaWithType`
+- **Optional**: `false`
 - **Description**: The schema of the configuration object.
 
 ### `configName`
 - **Type**: `string`
+- **Optional**: `false`
 - **Description**: The name of the remote configuration.
 - **Environment Variable**: `CONFIG_NAME`
 
 ### `version`
 - **Type**: `'latest' | number`
+- **Optional**: `false`
 - **Description**: The version of the remote configuration. It can be either `'latest'` or a number.
 - **Environment Variable**: `CONFIG_VERSION`
 
 ### `configServerUrl`
 - **Type**: `string`
+- **Optional**: `false`
 - **Description**: The URL of the configuration server.
 - **Environment Variable**: `CONFIG_SERVER_URL`
 
 ### `offlineMode`
 - **Type**: `boolean`
 - **Optional**: `true`
+- **Default**: `false`
 - **Description**: Indicates whether the configuration should be loaded in offline mode.
 - **Environment Variable**: `CONFIG_OFFLINE_MODE`
 
@@ -102,6 +107,7 @@ This package allows you to configure various options for loading and managing co
 
 ### `localConfigPath`
 - **Type**: `string`
+- **Optional**: `true`
 - **Default**: `./config`
 - **Description**: The path to the local configuration folder.
 
