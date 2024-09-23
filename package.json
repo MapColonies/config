@@ -61,7 +61,7 @@
     "undici": "^6.18.2"
   },
   "peerDependencies": {
-    "@map-colonies/schemas": "https://ghatmpstorage.blob.core.windows.net/npm-packages/schemas-399e58630a3b06e85b16292228e87ba5c0271809.tgz"
+    "@map-colonies/schemas": "^0.2.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
