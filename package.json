@@ -61,7 +61,7 @@
     "undici": "^6.18.2"
   },
   "peerDependencies": {
-    "@map-colonies/schemas": "^0.2.0"
+    "@map-colonies/schemas": "^1.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
