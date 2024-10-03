@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/MapColonies/config/compare/v1.0.0...v1.1.0) (2024-10-03)
+
+
+### Features
+
+* upgraded json schema version to 2019-09 ([#6](https://github.com/MapColonies/config/issues/6)) ([289a3aa](https://github.com/MapColonies/config/commit/289a3aa30c0d1492ecd957df284e045710305d16))
+
 ## 1.0.0 (2024-09-08)
 
 
