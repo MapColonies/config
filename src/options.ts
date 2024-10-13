@@ -3,8 +3,15 @@ import { BaseOptions, optionsSchema } from './types';
 import { ajvOptionsValidator, validate } from './validator';
 import { createDebug } from './utils/debug';
 import { createConfigError } from './errors';
+import { PACKAGE_NAME } from './constants';
 
 const debug = createDebug('options');
+
+const defaultOptions: BaseOptions = {
+  configName: PACKAGE_NAME,
+  configServerUrl: 'http://localhost:8080',
+  version: 'latest',
+};
 
 const envOptions: Partial<Record<keyof BaseOptions, string>> = {
   configName: process.env.CONFIG_NAME,
@@ -24,9 +31,8 @@ for (const key in envOptions) {
 let baseOptions: BaseOptions | undefined = undefined;
 
 export function initializeOptions(options: Partial<BaseOptions>): BaseOptions {
-  debug('initializing options with %j and env %j', options, envOptions);
-  const mergedOptions = deepmerge(options, envOptions);
-
+  debug('initializing options with default options: %j function input: %j and environment variables: %j', defaultOptions, options, envOptions);
+  const mergedOptions = deepmerge.all([defaultOptions, options, envOptions]);
   debug('merged options: %j', mergedOptions);
 
   const [errors, validatedOptions] = validate(ajvOptionsValidator, optionsSchema, mergedOptions);

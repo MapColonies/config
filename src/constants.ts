@@ -3,6 +3,7 @@ import { readPackageJsonSync } from '@map-colonies/read-pkg';
 
 const schemasPackagePathBuildPath = require.resolve('@map-colonies/schemas').substring(0, require.resolve('@map-colonies/schemas').indexOf('build'));
 export const LOCAL_SCHEMAS_PACKAGE_VERSION = readPackageJsonSync(path.join(schemasPackagePathBuildPath, 'package.json')).version as string;
+export const PACKAGE_NAME = readPackageJsonSync('package.json').name ?? 'package-name-not-defined';
 
 export const SCHEMA_DOMAIN = 'https://mapcolonies.com/';
 

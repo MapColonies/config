@@ -51,7 +51,7 @@ describe('schemas', () => {
 
       const dereferencedSchema = await loadSchema(schema);
 
-      expect(dereferencedSchema).toHaveProperty('allOf[0].$id', 'https://mapcolonies.com/common/db/partial/v1');
+      expect(dereferencedSchema).toHaveProperty('allOf[0].title', 'commonDbPartialV1');
     });
 
     it('should throw an error if the schema is not found', async () => {
