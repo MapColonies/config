@@ -72,7 +72,7 @@ export interface BaseOptions {
  * Represents the options for configuration.
  */
 export type ConfigOptions<T extends SchemaWithType> = Prettify<
-  BaseOptions & {
+  Partial<BaseOptions> & {
     /**
      * The schema of the configuration object.
      */

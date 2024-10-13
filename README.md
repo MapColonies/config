@@ -76,19 +76,22 @@ This package allows you to configure various options for loading and managing co
 
 ### `configName`
 - **Type**: `string`
-- **Optional**: `false`
+- **Optional**: `true`
+- 
 - **Description**: The name of the remote configuration.
 - **Environment Variable**: `CONFIG_NAME`
 
 ### `version`
 - **Type**: `'latest' | number`
-- **Optional**: `false`
+- **Optional**: `true`
+- **Default**: `latest`
 - **Description**: The version of the remote configuration. It can be either `'latest'` or a number.
 - **Environment Variable**: `CONFIG_VERSION`
 
 ### `configServerUrl`
 - **Type**: `string`
-- **Optional**: `false`
+- **Optional**: `true`
+- **Default**: `http://localhost:8080`
 - **Description**: The URL of the configuration server.
 - **Environment Variable**: `CONFIG_SERVER_URL`
 
@@ -110,31 +113,6 @@ This package allows you to configure various options for loading and managing co
 - **Optional**: `true`
 - **Default**: `./config`
 - **Description**: The path to the local configuration folder.
-
-## JSON Schema
-
-The options are validated against the following JSON schema:
-
-```json
-{
-  "required": ["configName", "configServerUrl", "version"],
-  "additionalProperties": false,
-  "type": "object",
-  "properties": {
-    "configName": { "type": "string" },
-    "version": {
-      "oneOf": [
-        { "type": "string", "const": "latest" },
-        { "type": "integer", "minimum": 1 }
-      ]
-    },
-    "configServerUrl": { "type": "string" },
-    "offlineMode": { "type": "boolean", "nullable": true },
-    "ignoreServerIsOlderVersionError": { "type": "boolean", "nullable": true },
-    "localConfigPath": { "type": "string", "default": "./config" }
-  }
-}
-```
 
 ## Environment Variable Configuration
 

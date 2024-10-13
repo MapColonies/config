@@ -60,13 +60,12 @@ describe('options', () => {
     });
 
     it('should throw an error if options are invalid', () => {
-      process.env.CONFIG_VERSION = 'latest';
       process.env.CONFIG_SERVER_URL = 'http://localhost:8080';
 
       const { initializeOptions } = require('../src/options');
 
       expect(() => {
-        initializeOptions({});
+        initializeOptions({ version: 'avi' });
       }).toThrow();
     });
 
