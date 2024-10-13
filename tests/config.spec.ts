@@ -1,5 +1,5 @@
 import { Interceptable, MockAgent, setGlobalDispatcher } from 'undici';
-import { commonDbPartialV1, commonS3PartialV2 } from '@map-colonies/schemas';
+import { commonDbPartialV1, commonS3PartialV1 } from '@map-colonies/schemas';
 import { StatusCodes } from 'http-status-codes';
 import { config } from '../src/config';
 
@@ -138,13 +138,14 @@ describe('config', () => {
       jest.resetModules();
       process.env.S3_ACCESS_KEY = 'access';
       process.env.S3_SECRET_KEY = 'secret';
+      process.env.S3_ENDPOINT = 'http://localhost:9000';
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
       const { config } = require('../src/config') as typeof import('../src/config');
       const configInstance = await config({
         configName: 'name',
         version: 1,
-        schema: commonS3PartialV2,
+        schema: commonS3PartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
         offlineMode: true,
@@ -236,7 +237,7 @@ describe('config', () => {
       const promise = config({
         configName: 'name',
         version: 1,
-        schema: commonS3PartialV2,
+        schema: commonS3PartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
       });
