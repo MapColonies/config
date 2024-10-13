@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/MapColonies/config/compare/v1.1.0...v1.2.0) (2024-10-13)
+
+
+### Features
+
+* changed all options except schema to be optional ([#10](https://github.com/MapColonies/config/issues/10)) ([26a47e2](https://github.com/MapColonies/config/commit/26a47e265854db8d7b61e6e6602ef3224b50122a))
+
 ## [1.1.0](https://github.com/MapColonies/config/compare/v1.0.0...v1.1.0) (2024-10-03)
 
 
