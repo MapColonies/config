@@ -114,6 +114,11 @@ This package allows you to configure various options for loading and managing co
 - **Default**: `./config`
 - **Description**: The path to the local configuration folder.
 
+### `metricsRegistry`
+- **Type**: `promClient.Registry`
+- **Optional**: `true`
+- **Description**: The prometheus registry to use for metrics. If not provided, metrics are not provided.
+
 ## Environment Variable Configuration
 
 The following environment variables can be used to configure the options:
@@ -242,6 +247,11 @@ try {
   }
   ```
 - **Description**: This error occurs when there is a version mismatch between the remote and local schemas. The payload includes the versions of both the remote and local schemas.
+
+### `promClientNotInstalledError`
+- **Code**: `8`
+- **Payload**: `Error`
+- **Description**: This error occurs when the `prom-client` package is not installed. The payload contains the error object.
 
 # Debugging
 If for some reason you want to debug the package you can either use the `getConfigParts` or the `getResolvedOptions` functions described in the API or use the more powerful debug logger.

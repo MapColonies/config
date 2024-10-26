@@ -105,3 +105,5 @@ dist
 
 # reports of jest tests
 reports
+
+src/version.ts
