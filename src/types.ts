@@ -1,5 +1,6 @@
 import { typeSymbol } from '@map-colonies/schemas/build/schemas/symbol';
 import { JSONSchemaType } from 'ajv';
+import { initial } from 'lodash';
 import type { Registry } from 'prom-client';
 
 type Prettify<T> = {
@@ -139,4 +140,10 @@ export interface ConfigInstance<T> {
    * @returns The resolved options.
    */
   getResolvedOptions: () => BaseOptions;
+
+  /**
+   * Initializes the metrics for the configuration object.
+   * @param registry - The registry for the metrics.
+   */
+  initializeMetrics: (registry: Registry) => void;
 }

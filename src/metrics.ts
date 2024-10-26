@@ -11,16 +11,18 @@ const MILLISECONDS_PER_SECOND = 1000;
 let promClient: typeof import('prom-client') | undefined;
 
 function loadPromClient(): void {
-  if (promClient === undefined) {
-    debug('loading prom-client');
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      promClient = require('prom-client');
-    } catch (error) {
-      console.log('error', error);
+  if (promClient !== undefined) {
+    return;
+  }
 
-      throw createConfigError('promClientNotInstalledError', 'prom-client is not installed and metrics was initialized', error as Error);
-    }
+  debug('loading prom-client');
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    promClient = require('prom-client');
+  } catch (error) {
+    console.log('error', error);
+
+    throw createConfigError('promClientNotInstalledError', 'prom-client is not installed and metrics was initialized', error as Error);
   }
 }
 
@@ -51,7 +53,7 @@ export function initializeMetrics(registry: Registry, schemaId: string, actualVe
       schema_id: schemaId,
     },
 
-    Date.now() / MILLISECONDS_PER_SECOND
+    Math.round(Date.now() / MILLISECONDS_PER_SECOND)
   );
 
   /* eslint-enable @typescript-eslint/naming-convention */

@@ -62,6 +62,10 @@ The `ConfigInstance` interface represents the your way to interact with the conf
 - **Description**: Retrieves the resolved options from the configuration object. Useful for debugging.
 - **Returns**: The resolved options, which are an instance of `BaseOptions`.
 
+##### `initializeMetrics(registry: promClient.Registry): void`
+- **Description**: Initializes the metrics for the configuration.
+- **Parameters**:
+  - `registry` (`promClient.Registry`): The prometheus registry to use for the metrics.
 
 # Configuration Options
 
@@ -113,11 +117,6 @@ This package allows you to configure various options for loading and managing co
 - **Optional**: `true`
 - **Default**: `./config`
 - **Description**: The path to the local configuration folder.
-
-### `metricsRegistry`
-- **Type**: `promClient.Registry`
-- **Optional**: `true`
-- **Description**: The prometheus registry to use for metrics. If not provided, metrics are not provided.
 
 ## Environment Variable Configuration
 
