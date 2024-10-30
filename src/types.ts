@@ -1,6 +1,5 @@
 import { typeSymbol } from '@map-colonies/schemas/build/schemas/symbol';
 import { JSONSchemaType } from 'ajv';
-import { initial } from 'lodash';
 import type { Registry } from 'prom-client';
 
 type Prettify<T> = {

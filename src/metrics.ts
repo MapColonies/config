@@ -20,8 +20,6 @@ function loadPromClient(): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     promClient = require('prom-client');
   } catch (error) {
-    console.log('error', error);
-
     throw createConfigError('promClientNotInstalledError', 'prom-client is not installed and metrics was initialized', error as Error);
   }
 }
