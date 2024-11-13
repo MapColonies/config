@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/MapColonies/config/compare/v1.2.0...v1.3.0) (2024-11-13)
+
+
+### Features
+
+* added metrics ([#15](https://github.com/MapColonies/config/issues/15)) ([94286d3](https://github.com/MapColonies/config/commit/94286d31ab62545ca6cda36ff8d57f8164454dd3))
+
 ## [1.2.0](https://github.com/MapColonies/config/compare/v1.1.0...v1.2.0) (2024-10-13)
 
 
