@@ -2,9 +2,10 @@ import deepmerge from 'deepmerge';
 import { typeSymbol } from '@map-colonies/schemas/build/schemas/symbol';
 import configPkg from 'config';
 import semver from 'semver';
+import type { Registry } from 'prom-client';
 import lodash, { type GetFieldType } from 'lodash';
 import { getEnvValues } from './env';
-import { BaseOptions, ConfigOptions, ConfigInstance } from './types';
+import { BaseOptions, ConfigOptions, ConfigInstance, Config } from './types';
 import { loadSchema } from './schemas';
 import { getOptions, initializeOptions } from './options';
 import { getRemoteConfig, getServerCapabilities } from './httpClient';
@@ -12,6 +13,7 @@ import { ajvConfigValidator, validate } from './validator';
 import { createDebug } from './utils/debug';
 import { LOCAL_SCHEMAS_PACKAGE_VERSION } from './constants';
 import { createConfigError } from './errors';
+import { initializeMetrics as initializeMetricsInternal } from './metrics';
 
 const debug = createDebug('config');
 
@@ -30,11 +32,12 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
 ): Promise<ConfigInstance<T[typeof typeSymbol]>> {
   // handle package options
   debug('config called with options: %j', { ...options, schema: options.schema.$id });
-  const { schema: baseSchema, ...unvalidatedOptions } = options;
+  const { schema: baseSchema, metricsRegistry, ...unvalidatedOptions } = options;
   const { configName, offlineMode, version, ignoreServerIsOlderVersionError } = initializeOptions(unvalidatedOptions);
 
   let remoteConfig: object | T = {};
 
+  let serverConfigResponse: Config | undefined = undefined;
   // handle remote config
   if (offlineMode !== true) {
     debug('handling fetching remote data');
@@ -58,7 +61,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
     }
 
     // get the remote config
-    const serverConfigResponse = await getRemoteConfig(configName, version);
+    serverConfigResponse = await getRemoteConfig(configName, version);
 
     if (serverConfigResponse.schemaId !== baseSchema.$id) {
       debug('schema version mismatch. local: %s, remote: %s', baseSchema.$id, serverConfigResponse.schemaId);
@@ -125,5 +128,9 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
     return getOptions();
   }
 
-  return { get, getAll, getConfigParts, getResolvedOptions };
+  function initializeMetrics(registry: Registry): void {
+    initializeMetricsInternal(registry, baseSchema.$id, serverConfigResponse?.version);
+  }
+
+  return { get, getAll, getConfigParts, getResolvedOptions, initializeMetrics };
 }

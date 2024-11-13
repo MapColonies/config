@@ -16,12 +16,14 @@
     "prelint": "npm run format",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
+    "pretest": "npm run generate:version",
     "test": "cross-env SUPPRESS_NO_CONFIG_WARNING=true NODE_CONFIG_STRICT_MODE=false jest --config=./tests/configurations/jest.config.js",
-    "prebuild": "npm run clean",
+    "prebuild": "npm run clean && npm run generate:version",
     "build": "tsc --project tsconfig.build.json",
     "start": "npm run build && cd dist && node ./index.js",
     "clean": "rimraf dist",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "generate:version": "node scripts/generateVersionFile.mjs"
   },
   "repository": {
     "type": "git",
@@ -61,7 +63,13 @@
     "undici": "^6.18.2"
   },
   "peerDependencies": {
-    "@map-colonies/schemas": "^1.0.0"
+    "@map-colonies/schemas": "^1.0.0",
+    "prom-client": "^15.0.0"
+  },
+  "peerDependenciesMeta": {
+    "prom-client": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
@@ -80,6 +88,7 @@
     "prettier": "^2.2.1",
     "pretty-quick": "^3.1.0",
     "ts-jest": "^29.1.5",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "prom-client": "^15.0.0"
   }
 }

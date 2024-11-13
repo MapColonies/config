@@ -62,6 +62,10 @@ The `ConfigInstance` interface represents the your way to interact with the conf
 - **Description**: Retrieves the resolved options from the configuration object. Useful for debugging.
 - **Returns**: The resolved options, which are an instance of `BaseOptions`.
 
+##### `initializeMetrics(registry: promClient.Registry): void`
+- **Description**: Initializes the metrics for the configuration.
+- **Parameters**:
+  - `registry` (`promClient.Registry`): The prometheus registry to use for the metrics.
 
 # Configuration Options
 
@@ -242,6 +246,11 @@ try {
   }
   ```
 - **Description**: This error occurs when there is a version mismatch between the remote and local schemas. The payload includes the versions of both the remote and local schemas.
+
+### `promClientNotInstalledError`
+- **Code**: `8`
+- **Payload**: `Error`
+- **Description**: This error occurs when the `prom-client` package is not installed. The payload contains the error object.
 
 # Debugging
 If for some reason you want to debug the package you can either use the `getConfigParts` or the `getResolvedOptions` functions described in the API or use the more powerful debug logger.

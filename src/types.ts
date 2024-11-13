@@ -1,5 +1,6 @@
 import { typeSymbol } from '@map-colonies/schemas/build/schemas/symbol';
 import { JSONSchemaType } from 'ajv';
+import type { Registry } from 'prom-client';
 
 type Prettify<T> = {
   [K in keyof T]: T[K];
@@ -77,6 +78,11 @@ export type ConfigOptions<T extends SchemaWithType> = Prettify<
      * The schema of the configuration object.
      */
     schema: T;
+    /**
+     * The registry for the metrics. If not provided, the metrics will not be registered.
+     * Depends on the prom-client package being installed.
+     */
+    metricsRegistry?: Registry;
   }
 >;
 
@@ -133,4 +139,10 @@ export interface ConfigInstance<T> {
    * @returns The resolved options.
    */
   getResolvedOptions: () => BaseOptions;
+
+  /**
+   * Initializes the metrics for the configuration object.
+   * @param registry - The registry for the metrics.
+   */
+  initializeMetrics: (registry: Registry) => void;
 }
