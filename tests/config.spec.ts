@@ -1,3 +1,4 @@
+/// <reference types="jest-extended" />
 import { Interceptable, MockAgent, setGlobalDispatcher } from 'undici';
 import { commonDbPartialV1, commonS3PartialV1 } from '@map-colonies/schemas';
 import { StatusCodes } from 'http-status-codes';
@@ -40,7 +41,6 @@ describe('config', () => {
       });
 
       const conf = configInstance.getAll();
-
       expect(conf).toEqual({
         host: 'avi',
         port: 5432,
@@ -302,6 +302,34 @@ describe('config', () => {
       });
 
       await expect(promise).rejects.toThrow();
+    });
+
+    it('should returned on getAll() a full frozen configuration object ', async () => {
+      const configInstance = await config({
+        configName: 'name',
+        version: 1,
+        schema: commonDbPartialV1,
+        configServerUrl: URL,
+        localConfigPath: './tests/config',
+        offlineMode: true,
+      });
+
+      const conf = configInstance.getAll();
+      expect(conf).toBeFrozen();
+    });
+
+    it('should returned on get(`ssl`) a frozen sub configuration object ', async () => {
+      const configInstance = await config({
+        configName: 'name',
+        version: 1,
+        schema: commonDbPartialV1,
+        configServerUrl: URL,
+        localConfigPath: './tests/config',
+        offlineMode: true,
+      });
+
+      const conf = configInstance.get('ssl');
+      expect(conf).toBeFrozen();
     });
   });
 });
