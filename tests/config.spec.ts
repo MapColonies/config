@@ -40,7 +40,6 @@ describe('config', () => {
       });
 
       const conf = configInstance.getAll();
-
       expect(conf).toEqual({
         host: 'avi',
         port: 5432,
@@ -302,6 +301,58 @@ describe('config', () => {
       });
 
       await expect(promise).rejects.toThrow();
+    });
+
+    it('should not allow to modify the root object', async () => {
+      const configInstance = await config({
+        configName: 'name',
+        version: 1,
+        schema: commonDbPartialV1,
+        configServerUrl: URL,
+        localConfigPath: './tests/config',
+        offlineMode: true,
+      });
+
+      const conf = configInstance.getAll();
+      const action = () => {
+        conf.host = 'dummmy.host.check';
+      };
+      expect(action).toThrow(/Cannot assign to read only property/);
+    });
+
+    it('should not allow to modify the child object', async () => {
+      const configInstance = await config({
+        configName: 'name',
+        version: 1,
+        schema: commonDbPartialV1,
+        configServerUrl: URL,
+        localConfigPath: './tests/config',
+        offlineMode: true,
+      });
+
+      const conf = configInstance.get('ssl');
+      const action = () => {
+        conf.enabled = true; // try to change ssl configuration
+      };
+      expect(action).toThrow(/Cannot assign to read only property/);
+    });
+
+    it('should not allow to modify the extracted child object from root', async () => {
+      const configInstance = await config({
+        configName: 'name',
+        version: 1,
+        schema: commonDbPartialV1,
+        configServerUrl: URL,
+        localConfigPath: './tests/config',
+        offlineMode: true,
+      });
+
+      const conf = configInstance.getAll();
+      const sslConf = conf.ssl;
+      const action = () => {
+        sslConf.enabled = true;
+      };
+      expect(action).toThrow(/Cannot assign to read only property/);
     });
   });
 });

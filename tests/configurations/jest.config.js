@@ -11,6 +11,7 @@ module.exports = {
   coverageDirectory: '<rootDir>/coverage',
   rootDir: '../../.',
   testMatch: ['<rootDir>/tests/**/*.spec.ts'],
+  setupFilesAfterEnv: ['jest-extended/all'],
   // setupFiles: ['<rootDir>/tests/configurations/jest.setup.ts'],
   // setupFiles: ['<rootDir>/tests/configurations/afterEnv.setup.ts'],
   // reporters: [

@@ -14,6 +14,7 @@ import { createDebug } from './utils/debug';
 import { LOCAL_SCHEMAS_PACKAGE_VERSION } from './constants';
 import { createConfigError } from './errors';
 import { initializeMetrics as initializeMetricsInternal } from './metrics';
+import { deepFreeze } from './utils/helpers';
 
 const debug = createDebug('config');
 
@@ -101,7 +102,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
 
   debug('freezing validated config');
   // freeze the merged config so it can't be modified by the package user
-  Object.freeze(validatedConfig);
+  deepFreeze(validatedConfig);
 
   function get<TPath extends string>(path: TPath): GetFieldType<T[typeof typeSymbol], TPath> {
     debug('get called with path: %s', path);

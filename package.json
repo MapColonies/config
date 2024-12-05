@@ -89,6 +89,7 @@
     "pretty-quick": "^3.1.0",
     "ts-jest": "^29.1.5",
     "typescript": "^5.4.5",
-    "prom-client": "^15.0.0"
+    "prom-client": "^15.0.0",
+    "jest-extended": "^4.0.2"
   }
 }
