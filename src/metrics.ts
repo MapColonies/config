@@ -37,6 +37,7 @@ export function initializeMetrics(registry: Registry, schemaId: string, actualVe
     name: 'config_time_of_last_fetch_unix_timestamp',
     help: 'The time of the last fetch of the configuration in unix timestamp',
     labelNames: ['name', 'request_version', 'actual_version', 'offline_mode', 'schemas_package_version', 'package_version', 'schema_id'],
+    registers: [registry],
   });
 
   /* eslint-disable @typescript-eslint/naming-convention */
@@ -53,7 +54,4 @@ export function initializeMetrics(registry: Registry, schemaId: string, actualVe
 
     Math.round(Date.now() / MILLISECONDS_PER_SECOND)
   );
-
-  /* eslint-enable @typescript-eslint/naming-convention */
-  registry.registerMetric(gauge);
 }
