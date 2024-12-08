@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/MapColonies/config/compare/v1.3.0...v1.3.1) (2024-12-05)
+
+
+### Bug Fixes
+
+* changed so the gauge is not registered on the default metrics ([#20](https://github.com/MapColonies/config/issues/20)) ([3e86838](https://github.com/MapColonies/config/commit/3e86838999aca5b366de4f997862df8da4734890))
+* support sub configuration to be immutable to ([#19](https://github.com/MapColonies/config/issues/19)) ([7609fa3](https://github.com/MapColonies/config/commit/7609fa3b1394bac06ad59fdc698ce83c26083814))
+
 ## [1.3.0](https://github.com/MapColonies/config/compare/v1.2.0...v1.3.0) (2024-11-13)
 
 
