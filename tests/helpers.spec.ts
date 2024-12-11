@@ -2,7 +2,7 @@ import { deepFreeze } from '../src/utils/helpers';
 
 describe('helpers', () => {
   describe('#deepFreeze', () => {
-    it('should return object freeze', () => {
+    it('should return frozen object', () => {
       const data = {
         name: 'I am parent',
         child: {
@@ -17,7 +17,7 @@ describe('helpers', () => {
       expect(action).toThrow(/Cannot assign to read only property/);
     });
 
-    it('should return object freeze with null value', () => {
+    it('should return frozen object with nested null value without error', () => {
       const data = {
         name: 'I am parent',
         child: {
