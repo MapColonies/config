@@ -1,3 +1,4 @@
+import 'jest-extended';
 import { deepFreeze } from '../src/utils/helpers';
 
 describe('helpers', () => {
@@ -9,27 +10,34 @@ describe('helpers', () => {
           name: 'I am child',
         },
       };
-      deepFreeze(data);
 
-      const action = () => {
-        data.name = 'i try to change'; // try to change freezed object
-      };
-      expect(action).toThrow(/Cannot assign to read only property/);
+      deepFreeze(data);
+      expect(data).toBeFrozen();
     });
 
-    it('should return frozen object with nested null value without error', () => {
+    it('should freeze the input object that include null valued property without error', () => {
+      const data = {
+        name: null,
+        child: {
+          name: 'i am child',
+        },
+      };
+
+      deepFreeze(data);
+      expect(data).toBeFrozen();
+    });
+
+    it('should freeze the input object include nested property', () => {
       const data = {
         name: 'I am parent',
         child: {
-          name: null,
+          name: 'I am child',
         },
       };
-      deepFreeze(data);
 
-      const action = () => {
-        data.name = 'i try to change'; // try to change freezed object
-      };
-      expect(action).toThrow(/Cannot assign to read only property/);
+      deepFreeze(data);
+      const child = data.child;
+      expect(child).toBeFrozen();
     });
   });
 });
