@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/MapColonies/config/compare/v1.3.1...v1.3.2) (2024-12-11)
+
+
+### Bug Fixes
+
+* support null valued config attributes ([a8fabad](https://github.com/MapColonies/config/commit/a8fabad30160e542dfc3c25862fb40db54c9cde6))
+
 ## [1.3.1](https://github.com/MapColonies/config/compare/v1.3.0...v1.3.1) (2024-12-05)
 
 
