@@ -53,7 +53,7 @@ function parseSchemaEnv(schema: JSONSchema): EnvMap {
         debug('going over object properties at path %s', key, path);
         const subSchema = schema.properties[key];
 
-        if (typeof subSchema !== 'boolean') {
+        if (typeof subSchema !== 'boolean' && subSchema !== undefined) {
           iterateOverSchemaObject(subSchema, path === '' ? key : `${path}.${key}`);
         }
       }

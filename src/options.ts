@@ -38,7 +38,7 @@ export function initializeOptions(options: Partial<BaseOptions>): BaseOptions {
   const [errors, validatedOptions] = validate(ajvOptionsValidator, optionsSchema, mergedOptions);
 
   if (errors) {
-    debug('error validating options: %s', errors[0].message);
+    debug('error validating options: %s', errors[0] !== undefined ? errors[0].message : 'unknown error');
     throw createConfigError(
       'optionValidationError',
       'An error occurred while validating the given options. please check both arguments and environment variables',
