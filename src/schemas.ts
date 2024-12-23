@@ -36,6 +36,10 @@ export async function loadSchema(schema: JSONSchema): ReturnType<typeof refParse
         read: (file: { url: string; hash: string; extension: string }) => {
           const subPath = file.url.split(SCHEMA_DOMAIN)[1];
 
+          if (subPath === undefined) {
+            throw createConfigError(`schemaNotFoundError`, `Schema url is not valid`, { schemaPath: file.url });
+          }
+
           return loadSpecificSchema(subPath);
         },
       },
