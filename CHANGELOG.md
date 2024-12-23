@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/MapColonies/config/compare/v1.3.2...v2.0.0) (2024-12-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* added engine setting to package.json ([#24](https://github.com/MapColonies/config/issues/24))
+
+### Build System
+
+* added engine setting to package.json ([#24](https://github.com/MapColonies/config/issues/24)) ([521ebb4](https://github.com/MapColonies/config/commit/521ebb4df4ae5c91c5c5789f4fa8fa38567e93ff))
+
 ## [1.3.2](https://github.com/MapColonies/config/compare/v1.3.1...v1.3.2) (2024-12-11)
 
 
