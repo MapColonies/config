@@ -1,4 +1,4 @@
-name: Lint
+name: Pull request
 
 on: [pull_request]
 
@@ -11,14 +11,8 @@ jobs:
       - name: Check out TS Project Git repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install TS Project dependencies
-        run: npm ci
+      - name: Init nodejs
+        uses: ./.github/actions/init-npm
 
       - name: Run TS Project linters
         uses: wearerequired/lint-action@v2
@@ -28,6 +22,31 @@ jobs:
           eslint: true
           prettier: true
           eslint_extensions: ts
+
+  tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node: [20.x, 22.x]
+
+    steps:
+      - name: Check out TS Project Git repository
+        uses: actions/checkout@v4
+        
+      - name: Init nodejs
+        uses: ./.github/actions/init-npm
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Run tests
+        run: npm run test
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Test Reporters ${{ matrix.node }}
+          path: ./reports/**
 
   upload_package:
     needs: [lint]
