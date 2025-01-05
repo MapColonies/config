@@ -2,11 +2,6 @@ import { typeSymbol } from '@map-colonies/schemas/build/schemas/symbol';
 import { JSONSchemaType } from 'ajv';
 import type { Registry } from 'prom-client';
 
-type Prettify<T> = {
-  [K in keyof T]: T[K];
-  // eslint-disable-next-line @typescript-eslint/ban-types
-} & {};
-
 export type EnvType = 'number' | 'string' | 'boolean' | 'integer' | 'null';
 
 export interface EnvDetails {
@@ -72,19 +67,17 @@ export interface BaseOptions {
 /**
  * Represents the options for configuration.
  */
-export type ConfigOptions<T extends SchemaWithType> = Prettify<
-  Partial<BaseOptions> & {
-    /**
-     * The schema of the configuration object.
-     */
-    schema: T;
-    /**
-     * The registry for the metrics. If not provided, the metrics will not be registered.
-     * Depends on the prom-client package being installed.
-     */
-    metricsRegistry?: Registry;
-  }
->;
+export interface ConfigOptions<T extends SchemaWithType> extends Partial<BaseOptions> {
+  /**
+   * The schema of the configuration object.
+   */
+  schema: T;
+  /**
+   * The registry for the metrics. If not provided, the metrics will not be registered.
+   * Depends on the prom-client package being installed.
+   */
+  metricsRegistry?: Registry;
+}
 
 export const optionsSchema: JSONSchemaType<BaseOptions> = {
   required: ['configName', 'configServerUrl', 'version'],
