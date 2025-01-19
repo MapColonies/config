@@ -7,6 +7,8 @@ updates:
       - '@MapColonies/infra'
     schedule:
       interval: daily
+    labels:
+      - 'infra'
     allow:
       - dependency-name: "@map-colonies/schemas"
     directory: /
@@ -20,6 +22,8 @@ updates:
       interval: weekly
     allow:
       - dependency-type: production
+    labels:
+      - 'infra'
     ignore:
       - dependency-name: "@map-colonies/schemas"
     directory: /
@@ -45,6 +49,8 @@ updates:
       - dependency-type: development
     ignore:
       - dependency-name: "@map-colonies/schemas"
+    labels:
+      - 'infra'
     directory: /
     commit-message:
       prefix: "deps"
@@ -66,6 +72,8 @@ updates:
   - package-ecosystem: github-actions
     schedule: 
       interval: weekly
+    labels:
+      - 'infra'
     commit-message:
       prefix: "ci"
     directory: "/"
