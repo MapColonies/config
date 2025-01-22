@@ -3,62 +3,66 @@ version: 2
 updates:
   # deps
   - package-ecosystem: npm
+    target-branch: 'master'
     reviewers:
-    - '@MapColonies/infra'
+      - '@MapColonies/infra'
     schedule:
-      interval: daily
-    allow:
-      - dependency-type: production
+      interval: weekly
     labels:
       - 'infra'
+    allow:
+      - dependency-type: production
     directory: /
     commit-message:
-      prefix: "deps"
+      prefix: 'deps'
     groups:
+      schemas:
+        patterns:
+          - '@map-colonies/schemas'
       map-colonies:
         patterns:
-          - "@map-colonies/*"
+          - '@map-colonies/*'
       opentelemetry:
         patterns:
-          - "@opentelemetry/*"
+          - '@opentelemetry/*'
       patch:
         update-types:
           - patch
           - minor
   # dev-deps
   - package-ecosystem: npm
-    reviewers:
-    - '@MapColonies/infra'
     schedule:
       interval: weekly
     allow:
       - dependency-type: development
-    labels:
-      - 'infra'
     directory: /
     commit-message:
-      prefix: "deps"
+      prefix: 'deps'
+    labels:
+      - 'infra'
+    reviewers:
+      - '@MapColonies/infra'
     groups:
       map-colonies:
         patterns:
-          - "@map-colonies/*"
+          - '@map-colonies/*'
       opentelemetry:
         patterns:
-          - "@opentelemetry/*"
+          - '@opentelemetry/*'
       types:
         patterns:
-          - "@types/*"
+          - '@types/*'
       dev-patch:
         update-types:
           - patch
           - minor
-    
+
   # github deps
   - package-ecosystem: github-actions
-    schedule: 
+    schedule:
       interval: weekly
     labels:
       - 'infra'
     commit-message:
-      prefix: "ci"
-    directory: "/"
+      prefix: 'ci'
+    directory: '/'
