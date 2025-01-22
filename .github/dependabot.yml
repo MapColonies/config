@@ -1,31 +1,16 @@
 # yaml-language-server: $schema=https://json.schemastore.org/dependabot-2.0.json
 version: 2
 updates:
-  # schemas
-  - package-ecosystem: npm
-    reviewers:
-      - '@MapColonies/infra'
-    schedule:
-      interval: daily
-    labels:
-      - 'infra'
-    allow:
-      - dependency-name: "@map-colonies/schemas"
-    directory: /
-    commit-message:
-      prefix: "deps"
   # deps
   - package-ecosystem: npm
     reviewers:
     - '@MapColonies/infra'
     schedule:
-      interval: weekly
+      interval: daily
     allow:
       - dependency-type: production
     labels:
       - 'infra'
-    ignore:
-      - dependency-name: "@map-colonies/schemas"
     directory: /
     commit-message:
       prefix: "deps"
@@ -39,6 +24,7 @@ updates:
       patch:
         update-types:
           - patch
+          - minor
   # dev-deps
   - package-ecosystem: npm
     reviewers:
@@ -47,8 +33,6 @@ updates:
       interval: weekly
     allow:
       - dependency-type: development
-    ignore:
-      - dependency-name: "@map-colonies/schemas"
     labels:
       - 'infra'
     directory: /
@@ -67,6 +51,7 @@ updates:
       dev-patch:
         update-types:
           - patch
+          - minor
     
   # github deps
   - package-ecosystem: github-actions
