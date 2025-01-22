@@ -24,7 +24,7 @@
     "clean": "rimraf dist",
     "prepublish": "npm run build",
     "generate:version": "node scripts/generateVersionFile.mjs",
-    "prepare": "husky"
+    "prepare": "husky",
     "docs": "typedoc src/index.ts"
   },
   "repository": {
