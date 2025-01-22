@@ -25,6 +25,7 @@
     "prepublish": "npm run build",
     "generate:version": "node scripts/generateVersionFile.mjs",
     "prepare": "husky"
+    "docs": "typedoc src/index.ts"
   },
   "repository": {
     "type": "git",
