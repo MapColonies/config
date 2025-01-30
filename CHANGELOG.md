@@ -1,5 +1,40 @@
 # Changelog
 
+## [2.0.0](https://github.com/MapColonies/config/compare/config-v1.3.2...config-v2.0.0) (2025-01-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* added engine setting to package.json ([#24](https://github.com/MapColonies/config/issues/24))
+
+### Features
+
+* added metrics ([#15](https://github.com/MapColonies/config/issues/15)) ([94286d3](https://github.com/MapColonies/config/commit/94286d31ab62545ca6cda36ff8d57f8164454dd3))
+* changed all options except schema to be optional ([#10](https://github.com/MapColonies/config/issues/10)) ([26a47e2](https://github.com/MapColonies/config/commit/26a47e265854db8d7b61e6e6602ef3224b50122a))
+* initial api ([#2](https://github.com/MapColonies/config/issues/2)) ([3d04ca0](https://github.com/MapColonies/config/commit/3d04ca0c01560219a1c00d6a41168446e3bf3809))
+* moved to common tsconfig package ([#26](https://github.com/MapColonies/config/issues/26)) ([f26ea3a](https://github.com/MapColonies/config/commit/f26ea3a2d2c7c64a2b32870b54295be7ba88d6a1))
+* upgraded json schema version to 2019-09 ([#6](https://github.com/MapColonies/config/issues/6)) ([289a3aa](https://github.com/MapColonies/config/commit/289a3aa30c0d1492ecd957df284e045710305d16))
+
+
+### Bug Fixes
+
+* changed so the gauge is not registered on the default metrics ([#20](https://github.com/MapColonies/config/issues/20)) ([3e86838](https://github.com/MapColonies/config/commit/3e86838999aca5b366de4f997862df8da4734890))
+* removed id from loaded schema to resolve the ref more than once error ([#5](https://github.com/MapColonies/config/issues/5)) ([6fa4373](https://github.com/MapColonies/config/commit/6fa43732ce98e908d7676125c311d71554e2b9d9))
+* support null valued config attributes ([a8fabad](https://github.com/MapColonies/config/commit/a8fabad30160e542dfc3c25862fb40db54c9cde6))
+* support sub configuration to be immutable to ([#19](https://github.com/MapColonies/config/issues/19)) ([7609fa3](https://github.com/MapColonies/config/commit/7609fa3b1394bac06ad59fdc698ce83c26083814))
+
+
+### Dependency Updates
+
+* add typedoc as a dependency in package.json and package-lock.json ([47a1b8a](https://github.com/MapColonies/config/commit/47a1b8ab9edf32cff84915b2f9ba782fa74681f5))
+
+
+### Build System
+
+* added engine setting to package.json ([#24](https://github.com/MapColonies/config/issues/24)) ([521ebb4](https://github.com/MapColonies/config/commit/521ebb4df4ae5c91c5c5789f4fa8fa38567e93ff))
+* added publish-config ([90ce4cc](https://github.com/MapColonies/config/commit/90ce4cce7d29580bec977a52cd131c50efa19060))
+* updated schemas ([1a117bf](https://github.com/MapColonies/config/commit/1a117bf0755d69c1dffbe82315071e116312de14))
+
 ## [1.3.2](https://github.com/MapColonies/config/compare/v1.3.1...v1.3.2) (2024-12-11)
 
 
