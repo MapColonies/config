@@ -34,7 +34,11 @@ export class ConfigError<ErrorName extends keyof ConfigErrors, Payload = ConfigE
    * @param message - The error message.
    * @param payload - The payload associated with the error.
    */
-  public constructor(name: ErrorName, message: string, public readonly payload: Payload | undefined) {
+  public constructor(
+    name: ErrorName,
+    message: string,
+    public readonly payload: Payload | undefined
+  ) {
     super(message);
     this.name = name;
     this.code = configErrors[name].code;
