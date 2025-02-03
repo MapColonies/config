@@ -32,6 +32,7 @@ jobs:
   upload_package:
     needs: [lint]
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Check out TS Project Git repository
         uses: actions/checkout@v4
