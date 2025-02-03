@@ -1,5 +1,30 @@
 # Changelog
 
+## [2.0.0](https://github.com/MapColonies/config/compare/v1.3.2...v2.0.0) (2025-02-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* update node engine requirement to >=20.18.1 in package.json
+* added engine setting to package.json ([#24](https://github.com/MapColonies/config/issues/24))
+
+### Features
+
+* moved to common tsconfig package ([#26](https://github.com/MapColonies/config/issues/26)) ([f26ea3a](https://github.com/MapColonies/config/commit/f26ea3a2d2c7c64a2b32870b54295be7ba88d6a1))
+
+
+### Dependency Updates
+
+* add typedoc as a dependency in package.json and package-lock.json ([47a1b8a](https://github.com/MapColonies/config/commit/47a1b8ab9edf32cff84915b2f9ba782fa74681f5))
+* bump the patch group across 1 directory with 3 updates ([#38](https://github.com/MapColonies/config/issues/38)) ([805a967](https://github.com/MapColonies/config/commit/805a967148f51526d1a6f4745fe124ae917517d0))
+* bump undici from 6.18.2 to 7.3.0 ([#29](https://github.com/MapColonies/config/issues/29)) ([ab407fb](https://github.com/MapColonies/config/commit/ab407fbf900dde1d301f998a3350f5670c12f07d))
+* update node engine requirement to &gt;=20.18.1 in package.json ([40289a0](https://github.com/MapColonies/config/commit/40289a0b0fbf6fba4522b3571059e61da78ed7d1))
+
+
+### Build System
+
+* added engine setting to package.json ([#24](https://github.com/MapColonies/config/issues/24)) ([521ebb4](https://github.com/MapColonies/config/commit/521ebb4df4ae5c91c5c5789f4fa8fa38567e93ff))
+
 ## [1.3.2](https://github.com/MapColonies/config/compare/v1.3.1...v1.3.2) (2024-12-11)
 
 
