@@ -44,7 +44,7 @@
   ],
   "homepage": "https://github.com/MapColonies/config#readme",
   "engines": {
-    "node": ">=20"
+    "node": ">=20.18.1"
   },
   "dependencies": {
     "@apideck/better-ajv-errors": "^0.3.6",
