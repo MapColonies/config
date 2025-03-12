@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import { JSONSchema } from '@apidevtools/json-schema-ref-parser';
 import { getEnvValues } from '../src/env';
 import { EnvType } from '../src/types';

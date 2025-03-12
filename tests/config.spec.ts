@@ -88,9 +88,9 @@ describe('config', () => {
       const port = configInstance.get('port');
       const ssl = configInstance.get('ssl.enabled');
 
-      expect(host).toEqual('localhost');
-      expect(port).toEqual(5432);
-      expect(ssl).toEqual(false);
+      expect(host).toBe('localhost');
+      expect(port).toBe(5432);
+      expect(ssl).toBe(false);
     });
 
     it('should override the local values with the server values', async () => {
@@ -139,7 +139,6 @@ describe('config', () => {
       process.env.S3_SECRET_KEY = 'secret';
       process.env.S3_ENDPOINT = 'http://localhost:9000';
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
       const { config } = require('../src/config') as typeof import('../src/config');
       const configInstance = await config({
         configName: 'name',
@@ -153,8 +152,8 @@ describe('config', () => {
       const accessKey = configInstance.get('accessKeyId');
       const secretKey = configInstance.get('secretAccessKey');
 
-      expect(accessKey).toEqual('access');
-      expect(secretKey).toEqual('secret');
+      expect(accessKey).toBe('access');
+      expect(secretKey).toBe('secret');
     });
 
     it('should return all the config parts', async () => {
