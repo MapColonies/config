@@ -13,7 +13,6 @@ function parseSchemaEnv(schema: JSONSchema): EnvMap {
 
   function handlePrimitive(schema: JSONSchema, type: EnvType, path: string): void {
     debug('handling primitive %s at path %s', type, path);
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const xFrom = (schema as { 'x-env-value'?: string })['x-env-value'];
     debug('value of xFrom: %s as path %s', xFrom, path);
     if (xFrom !== undefined) {
@@ -86,6 +85,9 @@ export function getEnvValues(schema: JSONSchema): object {
           break;
         case 'null':
           value = null;
+          break;
+        case 'string':
+          value = unparsedValue;
           break;
         default:
           value = unparsedValue;

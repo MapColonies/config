@@ -50,7 +50,6 @@ describe('validator', () => {
         type: 'object',
         properties: {
           foo: { type: 'number', default: 1 },
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           bar: { type: 'string', 'x-env-value': 'BAR' },
         },
         required: ['foo'],

@@ -1,5 +1,5 @@
 import { Dispatcher, request } from 'undici';
-import StatusCodes from 'http-status-codes';
+import statusCodes from 'http-status-codes';
 import { getOptions } from './options';
 import { Config, ServerCapabilities } from './types';
 import { createDebug } from './utils/debug';
@@ -19,7 +19,7 @@ async function requestWrapper(url: string, query?: Record<string, unknown>): Pro
   debug('Making request to %s', url);
   try {
     const res = await request(url, { query });
-    if (res.statusCode > StatusCodes.NOT_FOUND) {
+    if (res.statusCode > statusCodes.NOT_FOUND) {
       debug('Failed to fetch config. Status code: %d', res.statusCode);
       throw createConfigError('httpResponseError', 'Failed to fetch', await createHttpErrorPayload(res));
     }
@@ -39,12 +39,12 @@ export async function getRemoteConfig(configName: string, version: number | 'lat
   const url = `${configServerUrl}/config/${configName}/${version}`;
   const res = await requestWrapper(url, { shouldDereference: true });
 
-  if (res.statusCode === StatusCodes.BAD_REQUEST) {
+  if (res.statusCode === statusCodes.BAD_REQUEST) {
     debug('Invalid request to getConfig');
     throw createConfigError('httpResponseError', 'Invalid request to getConfig', await createHttpErrorPayload(res));
   }
 
-  if (res.statusCode === StatusCodes.NOT_FOUND) {
+  if (res.statusCode === statusCodes.NOT_FOUND) {
     debug('Config with given name and version was not found');
     throw createConfigError('httpResponseError', 'Config with given name and version was not found', await createHttpErrorPayload(res));
   }

@@ -1,7 +1,7 @@
 import deepmerge from 'deepmerge';
 import { typeSymbol } from '@map-colonies/schemas/build/schemas/symbol';
 import configPkg from 'config';
-import semver from 'semver';
+import { gt } from 'semver';
 import type { Registry } from 'prom-client';
 import lodash, { type GetFieldType } from 'lodash';
 import { getEnvValues } from './env';
@@ -45,7 +45,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
     // check if the server is using an older version of the schemas package
     const capabilitiesResponse = await getServerCapabilities();
 
-    if (ignoreServerIsOlderVersionError !== true && semver.gt(LOCAL_SCHEMAS_PACKAGE_VERSION, capabilitiesResponse.schemasPackageVersion)) {
+    if (ignoreServerIsOlderVersionError !== true && gt(LOCAL_SCHEMAS_PACKAGE_VERSION, capabilitiesResponse.schemasPackageVersion)) {
       debug(
         'server is using an older version of the schemas package. local: %s, remote: %s',
         LOCAL_SCHEMAS_PACKAGE_VERSION,
@@ -89,7 +89,6 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
   debug('env config: %j', envConfig);
 
   // merge all the configs into one object with the following priority: localConfig < remoteConfig < envConfig
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   const mergedConfig = deepmerge.all([localConfig, remoteConfig, envConfig], { arrayMerge });
   debug('merged config: %j', mergedConfig);
 
@@ -106,7 +105,6 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
 
   function get<TPath extends string>(path: TPath): GetFieldType<T[typeof typeSymbol], TPath> {
     debug('get called with path: %s', path);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return lodash.get(validatedConfig as (typeof baseSchema)[typeof typeSymbol], path);
   }
 
