@@ -9,7 +9,7 @@ type Prettify<T> = {
 export type EnvType = 'number' | 'string' | 'boolean' | 'integer' | 'null';
 
 export interface EnvDetails {
-  type: EnvType;
+  type: EnvType | 'json';
   path: string;
 }
 

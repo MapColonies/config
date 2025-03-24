@@ -101,5 +101,72 @@ describe('env', () => {
 
       expect(envValues).toEqual({ foo: 'bar' });
     });
+
+    it('should handle json value', () => {
+      process.env.FOO = '{"bar": "baz"}';
+      const schema = {
+        type: 'object',
+        properties: {
+          foo: { type: 'string', 'x-env-format': 'json', 'x-env-value': 'FOO' },
+        },
+        required: ['foo'],
+      } satisfies JSONSchema;
+
+      const envValues = getEnvValues(schema);
+
+      expect(envValues).toEqual({ foo: { bar: 'baz' } });
+    });
+
+    it('should handle json value in composed objects', () => {
+      process.env.FOO = '{"bar": "baz"}';
+      const schema = {
+        type: 'object',
+        allOf: [
+          {
+            type: 'object',
+            properties: {
+              foo: { type: 'string', 'x-env-format': 'json', 'x-env-value': 'FOO' },
+            },
+            required: ['foo'],
+          },
+        ],
+      } satisfies JSONSchema;
+
+      const envValues = getEnvValues(schema);
+
+      expect(envValues).toEqual({ foo: { bar: 'baz' } });
+    });
+
+    it('should handle primitive json values', () => {
+      process.env.FOO = '"bar"';
+      const schema = {
+        type: 'object',
+        properties: {
+          foo: { type: 'string', 'x-env-format': 'json', 'x-env-value': 'FOO' },
+        },
+        required: ['foo'],
+      } satisfies JSONSchema;
+
+      const envValues = getEnvValues(schema);
+
+      expect(envValues).toEqual({ foo: 'bar' });
+    });
+
+    it.only('should handle json value in the root object', () => {
+      process.env.FOO = '{"foo": {"bar": "baz"}}';
+      const schema = {
+        type: 'object',
+        'x-env-format': 'json',
+        'x-env-value': 'FOO',
+        properties: {
+          foo: { type: 'string' },
+        },
+        required: ['foo'],
+      } satisfies JSONSchema;
+
+      const envValues = getEnvValues(schema);
+
+      expect(envValues).toEqual({ foo: { bar: 'baz' } });
+    });
   });
 });
