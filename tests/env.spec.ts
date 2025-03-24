@@ -152,7 +152,7 @@ describe('env', () => {
       expect(envValues).toEqual({ foo: 'bar' });
     });
 
-    it.only('should handle json value in the root object', () => {
+    it('should handle json value in the root object', () => {
       process.env.FOO = '{"foo": {"bar": "baz"}}';
       const schema = {
         type: 'object',
@@ -160,6 +160,29 @@ describe('env', () => {
         'x-env-value': 'FOO',
         properties: {
           foo: { type: 'string' },
+        },
+        required: ['foo'],
+      } satisfies JSONSchema;
+
+      const envValues = getEnvValues(schema);
+
+      expect(envValues).toEqual({ foo: { bar: 'baz' } });
+    });
+
+    it('should handle nested json value when there is more nesting under it', () => {
+      process.env.FOO = '{"bar": "baz"}';
+      const schema = {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'object',
+            'x-env-format': 'json',
+            'x-env-value': 'FOO',
+            properties: {
+              bar: { type: 'string' },
+            },
+            required: ['bar'],
+          },
         },
         required: ['foo'],
       } satisfies JSONSchema;

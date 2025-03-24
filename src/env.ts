@@ -44,17 +44,11 @@ function parseSchemaEnv(schema: JSONSchema): EnvMap {
 
   function handlePossibleEnvValue(schema: JSONSchema, path: string): void {
     debug('handling possible env value at path %s', path);
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const xEnvValueFrom = (schema as { 'x-env-value'?: string })['x-env-value'];
 
     const isPrimitive = ['string', 'number', 'integer', 'boolean', 'null'].includes(schema.type as string);
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const isFormatJson = (schema as { 'x-env-format'?: string })['x-env-format'] === 'json';
-
-    console.log('schema', schema);
-    console.log('isPrimitive', isPrimitive);
-    console.log('isFormatJson', isFormatJson);
 
     if (xEnvValueFrom === undefined) {
       return;
@@ -144,14 +138,13 @@ export function getEnvValues(schema: JSONSchema): object {
           break;
         case 'string':
           value = unparsedValue;
+          break;
         case 'json':
           value = JSON.parse(unparsedValue);
           break;
         default:
           value = unparsedValue;
       }
-
-      console.log('path', details.path);
 
       if (details.path === '') {
         Object.assign(res, value);
