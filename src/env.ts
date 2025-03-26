@@ -11,37 +11,6 @@ function parseSchemaEnv(schema: JSONSchema): EnvMap {
   debug('parsing schema for env values');
   const fromEnv: EnvMap = {};
 
-  // function handlePrimitive(schema: JSONSchema, type: EnvType, path: string): void {
-  //   debug('handling primitive %s at path %s', type, path);
-  //   const xFrom = (schema as { 'x-env-value'?: string })['x-env-value'];
-  //   debug('value of xFrom: %s as path %s', xFrom, path);
-  //   if (xFrom !== undefined) {
-  //     fromEnv[xFrom] = {
-  //       type,
-  // function handlePrimitive(schema: JSONSchema, type: EnvType, path: string): void {
-  //   debug('handling primitive %s at path %s', type, path);
-  //   // eslint-disable-next-line @typescript-eslint/naming-convention
-  //   const xFrom = (schema as { 'x-env-value'?: string })['x-env-value'];
-  //   debug('value of xFrom: %s as path %s', xFrom, path);
-  //   if (xFrom !== undefined) {
-  //     fromEnv[xFrom] = {
-  //       type,
-  //       path,
-  //     };
-  //   }
-  // }
-
-  // function handleEnvValue(schema: JSONSchema, path: string): void {
-  //   debug('handling env value at path %s', path);
-  //   const format = schema.format;
-  //   if (format === 'json') {
-  //     fromEnv[path] = {
-  //       type: 'json',
-  //       path,
-  //     };
-  //   }
-  // }
-
   function handlePossibleEnvValue(schema: JSONSchema, path: string): void {
     debug('handling possible env value at path %s', path);
     const xEnvValueFrom = (schema as { 'x-env-value'?: string })['x-env-value'];
@@ -74,9 +43,7 @@ function parseSchemaEnv(schema: JSONSchema): EnvMap {
     debug('iterating over schema object at path %s', path);
 
     const type = schema.type;
-    // if (type === 'number' || type === 'string' || type === 'boolean' || type === 'integer' || type === 'null') {
-    //   return handlePrimitive(schema, type, path);
-    // }
+
     handlePossibleEnvValue(schema, path);
 
     if (type === 'array' || type === 'any') {
