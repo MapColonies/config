@@ -11,13 +11,29 @@ function parseSchemaEnv(schema: JSONSchema): EnvMap {
   debug('parsing schema for env values');
   const fromEnv: EnvMap = {};
 
-  function handlePrimitive(schema: JSONSchema, type: EnvType, path: string): void {
-    debug('handling primitive %s at path %s', type, path);
-    const xFrom = (schema as { 'x-env-value'?: string })['x-env-value'];
-    debug('value of xFrom: %s as path %s', xFrom, path);
-    if (xFrom !== undefined) {
-      fromEnv[xFrom] = {
-        type,
+  function handlePossibleEnvValue(schema: JSONSchema, path: string): void {
+    debug('handling possible env value at path %s', path);
+    const xEnvValueFrom = (schema as { 'x-env-value'?: string })['x-env-value'];
+
+    const isPrimitive = ['string', 'number', 'integer', 'boolean', 'null'].includes(schema.type as string);
+
+    const isFormatJson = (schema as { 'x-env-format'?: string })['x-env-format'] === 'json';
+
+    if (xEnvValueFrom === undefined) {
+      return;
+    }
+
+    if (isFormatJson) {
+      fromEnv[xEnvValueFrom] = {
+        type: 'json',
+        path,
+      };
+      return;
+    }
+
+    if (isPrimitive) {
+      fromEnv[xEnvValueFrom] = {
+        type: schema.type as EnvType,
         path,
       };
     }
@@ -25,10 +41,10 @@ function parseSchemaEnv(schema: JSONSchema): EnvMap {
 
   function iterateOverSchemaObject(schema: JSONSchema, path: string): void {
     debug('iterating over schema object at path %s', path);
+
     const type = schema.type;
-    if (type === 'number' || type === 'string' || type === 'boolean' || type === 'integer' || type === 'null') {
-      return handlePrimitive(schema, type, path);
-    }
+
+    handlePossibleEnvValue(schema, path);
 
     if (type === 'array' || type === 'any') {
       debug('array or any type at path %s', path);
@@ -67,6 +83,7 @@ export function getEnvValues(schema: JSONSchema): object {
   const res = {};
 
   const envMap = parseSchemaEnv(schema);
+
   for (const [key, details] of Object.entries(envMap)) {
     const unparsedValue = process.env[key];
     if (unparsedValue !== undefined) {
@@ -89,8 +106,16 @@ export function getEnvValues(schema: JSONSchema): object {
         case 'string':
           value = unparsedValue;
           break;
+        case 'json':
+          value = JSON.parse(unparsedValue);
+          break;
         default:
           value = unparsedValue;
+      }
+
+      if (details.path === '') {
+        Object.assign(res, value);
+        continue;
       }
 
       lodash.set(res, details.path, value);

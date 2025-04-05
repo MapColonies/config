@@ -17,7 +17,7 @@ const ajvConfigValidator = addFormats(
     allErrors: true,
     verbose: true,
     discriminator: true,
-    keywords: ['x-env-value'],
+    keywords: ['x-env-value', 'x-env-format'],
   })
 );
 

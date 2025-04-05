@@ -147,6 +147,8 @@ The package supports merging configurations from multiple sources (local, remote
 ### Environment Variables
 
 Configuration options can be overridden by setting the corresponding environment variables as described in schema using the `x-env-value` key.
+If an environment variable is set, it takes precedence over the value from the remote or local configuration.,
+If the value of the `x-env-format` key is `json`, the environment variable value is parsed as JSON.
 
 ### Merging Configurations
 
