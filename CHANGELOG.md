@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/MapColonies/config/compare/v2.0.0...v2.1.0) (2025-04-05)
+
+
+### Features
+
+* added support for json env format ([#59](https://github.com/MapColonies/config/issues/59)) ([1b082e6](https://github.com/MapColonies/config/commit/1b082e6c39c0143967f06ca829db515c748de3f2))
+
 ## [2.0.0](https://github.com/MapColonies/config/compare/v1.3.2...v2.0.0) (2025-02-03)
 
 
