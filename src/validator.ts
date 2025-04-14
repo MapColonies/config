@@ -23,15 +23,18 @@ const ajvConfigValidator = addFormats(
 
 ajvConfigValidator.addMetaSchema(draft7MetaSchema, 'http://json-schema.org/draft-07/schema#');
 
-function enrichError(betterErrors: ValidationError[], errors: ErrorObject[]): (ValidationError & { params?: Record<string, unknown> })[] {
+function enrichErrors(betterErrors: ValidationError[], errors: ErrorObject[]): (ValidationError & { params?: Record<string, unknown> })[] {
   return betterErrors.map((error, index) => {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (error.context.errorType) {
       case 'unevaluatedProperties': {
         const originalError = errors[index];
+        if (!originalError || originalError.keyword !== 'unevaluatedProperties') {
+          return error;
+        }
         return {
           ...error,
-          params: originalError?.params,
+          params: originalError.params,
         };
       }
       default:
@@ -58,7 +61,7 @@ export function validate<T>(ajv: ajv, schema: SchemaObject, data: unknown): [Val
   if (!valid) {
     debug('validation failed with errors %j', ajv.errors);
     const betterErrors = betterAjvErrors({ schema: schema as Parameters<typeof betterAjvErrors>[0]['schema'], data, errors: ajv.errors });
-    return [enrichError(betterErrors, ajv.errors as ErrorObject[]), undefined];
+    return [enrichErrors(betterErrors, ajv.errors as ErrorObject[]), undefined];
   }
 
   debug('validation successful');
