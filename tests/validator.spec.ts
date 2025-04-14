@@ -54,10 +54,30 @@ describe('validator', () => {
         },
         required: ['foo'],
       };
+
       const data = {};
       const [errors, validatedData] = validate(ajvConfigValidator, schema, data);
+
       expect(errors).toBeUndefined();
       expect(validatedData).toEqual({ foo: 1 });
+    });
+
+    it('should enrich the error with params if unevaluatedProperties error occurs', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          foo: { type: 'string' },
+          bar: { type: 'number' },
+        },
+        required: ['foo'],
+        unevaluatedProperties: false,
+      };
+      const data = { foo: 'bar', baz: 123 };
+
+      const [errors, validatedData] = validate(ajvOptionsValidator, schema, data);
+
+      expect(validatedData).toBeUndefined();
+      expect(errors).toHaveProperty('[0].params.unevaluatedProperty', 'baz');
     });
   });
 });
