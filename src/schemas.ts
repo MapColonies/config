@@ -14,6 +14,7 @@ function loadSpecificSchema(relativePath: string): JSONSchema {
   const fullPath = path.join(SCHEMA_BASE_PATH, relativePath + '.schema.json');
 
   if (!fs.existsSync(fullPath)) {
+    console.log('Schema not found at path %s', fullPath);
     throw createConfigError(`schemaNotFoundError`, `Schema not found at path`, { schemaPath: fullPath });
   }
 
