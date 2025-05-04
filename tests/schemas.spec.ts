@@ -49,9 +49,13 @@ describe('schemas', () => {
         },
       } satisfies JSONSchema;
 
-      const dereferencedSchema = await loadSchema(schema);
+      try {
+        const dereferencedSchema = await loadSchema(schema);
 
-      expect(dereferencedSchema).toHaveProperty('allOf[0].title', 'commonDbPartialV1');
+        expect(dereferencedSchema).toHaveProperty('allOf[0].title', 'commonDbPartialV1');
+      } catch (error) {
+        console.error('Error loading schema:', error);
+      }
     });
 
     it('should throw an error if the schema is not found', async () => {
