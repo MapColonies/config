@@ -10,10 +10,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - run: npm ci
+      - name: Initialize npm environment
+        uses: ./.github/actions/init-npm
       - run: npm run build
       - uses: JS-DevTools/npm-publish@v3
         with:
