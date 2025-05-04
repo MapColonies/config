@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/MapColonies/config/compare/v2.1.0...v2.2.0) (2025-05-04)
+
+
+### Features
+
+* **validator:** enrich error handling for unevaluatedProperties by adding the property ([#63](https://github.com/MapColonies/config/issues/63)) ([2aa2bb5](https://github.com/MapColonies/config/commit/2aa2bb5092f880a96b418aa123b5bb9dac8613eb))
+
 ## [2.1.0](https://github.com/MapColonies/config/compare/v2.0.0...v2.1.0) (2025-04-05)
 
 
