@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import ajv, { AnySchemaObject, SchemaObject } from 'ajv/dist/2019';
+import ajv, { AnySchemaObject, ErrorObject, SchemaObject } from 'ajv/dist/2019';
 import addFormats from 'ajv-formats';
 import lodash from 'lodash';
 import { ValidationError, betterAjvErrors } from '@apideck/better-ajv-errors';
@@ -23,6 +23,26 @@ const ajvConfigValidator = addFormats(
 
 ajvConfigValidator.addMetaSchema(draft7MetaSchema, 'http://json-schema.org/draft-07/schema#');
 
+function enrichErrors(betterErrors: ValidationError[], errors: ErrorObject[]): (ValidationError & { params?: Record<string, unknown> })[] {
+  return betterErrors.map((error, index) => {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+    switch (error.context.errorType) {
+      case 'unevaluatedProperties': {
+        const originalError = errors[index];
+        if (!originalError || originalError.keyword !== 'unevaluatedProperties') {
+          return error;
+        }
+        return {
+          ...error,
+          params: originalError.params,
+        };
+      }
+      default:
+        return error;
+    }
+  });
+}
+
 export { ajvConfigValidator };
 
 export const ajvOptionsValidator = new ajv({
@@ -37,10 +57,11 @@ export function validate<T>(ajv: ajv, schema: SchemaObject, data: unknown): [Val
 
   const clonedData = lodash.cloneDeep(data);
   const valid = ajv.validate(schema, clonedData);
+
   if (!valid) {
     debug('validation failed with errors %j', ajv.errors);
     const betterErrors = betterAjvErrors({ schema: schema as Parameters<typeof betterAjvErrors>[0]['schema'], data, errors: ajv.errors });
-    return [betterErrors, undefined];
+    return [enrichErrors(betterErrors, ajv.errors as ErrorObject[]), undefined];
   }
 
   debug('validation successful');
