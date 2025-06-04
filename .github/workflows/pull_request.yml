@@ -1,4 +1,4 @@
-name: Lint
+name: Pull request validations
 
 on: [pull_request]
 
@@ -11,17 +11,32 @@ jobs:
       - name: Check out TS Project Git repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install TS Project dependencies
-        run: npm ci
+      - name: Initialize npm environment
+        uses: ./.github/actions/init-npm
 
       - name: Run TS Project linters
         run: npm run lint
+  tests:
+    name: Run Tests
+    
+    strategy:
+      matrix:
+        node: [20.x, 22.x]
+        os: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out TS Project Git repository
+        uses: actions/checkout@v4
+        
+      - name: Init nodejs
+        uses: ./.github/actions/init-npm
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Run tests
+        run: npm run test
   upload_package:
     needs: [lint]
     runs-on: ubuntu-latest
@@ -29,13 +44,8 @@ jobs:
     steps:
       - name: Check out TS Project Git repository
         uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: npm
-      - name: Install TS Project dependencies
-        run: npm ci
+      - name: Initialize npm environment
+        uses: ./.github/actions/init-npm
       - name: Pack the package
         run: npm pack
       - name: get properties
