@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.2.0](https://github.com/MapColonies/config/compare/v2.1.0...v2.2.0) (2025-06-04)
+
+
+### Features
+
+* **validator:** enrich error handling for unevaluatedProperties by adding the property ([#63](https://github.com/MapColonies/config/issues/63)) ([2aa2bb5](https://github.com/MapColonies/config/commit/2aa2bb5092f880a96b418aa123b5bb9dac8613eb))
+
+
+### Bug Fixes
+
+* added missing export declaration ([#74](https://github.com/MapColonies/config/issues/74)) ([11da6c7](https://github.com/MapColonies/config/commit/11da6c7700d8ce8ca064aff5ec3943afba6db479))
+* use path.sep for schema base path resolution ([#73](https://github.com/MapColonies/config/issues/73)) ([c466f8a](https://github.com/MapColonies/config/commit/c466f8a9fc5d629b7eb3eae902959ab479ef1633))
+
 ## [2.1.0](https://github.com/MapColonies/config/compare/v2.0.0...v2.1.0) (2025-04-05)
 
 
