@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/MapColonies/config/compare/v2.2.0...v2.2.1) (2025-06-15)
+
+
+### Bug Fixes
+
+* resolved handling of empty objects with x-env-value and enum without type string [MAPCO-7951] ([#76](https://github.com/MapColonies/config/issues/76)) ([678a2d1](https://github.com/MapColonies/config/commit/678a2d10f68f343f6d0925c5486b7237a550d78a))
+
 ## [2.2.0](https://github.com/MapColonies/config/compare/v2.1.0...v2.2.0) (2025-06-04)
 
 
