@@ -31,6 +31,15 @@ function parseSchemaEnv(schema: JSONSchema): EnvMap {
       return;
     }
 
+    if (schema.type === undefined) {
+      debug('schema type is undefined at path %s', path);
+      fromEnv[xEnvValueFrom] = {
+        type: 'string',
+        path,
+      };
+      return;
+    }
+
     if (isPrimitive) {
       fromEnv[xEnvValueFrom] = {
         type: schema.type as EnvType,
@@ -76,6 +85,8 @@ function parseSchemaEnv(schema: JSONSchema): EnvMap {
   }
 
   iterateOverSchemaObject(schema, '');
+  debug('parsed environment map: %O', fromEnv); // @typedoc Log the parsed environment map
+
   return fromEnv;
 }
 
