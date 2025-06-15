@@ -85,7 +85,7 @@ function parseSchemaEnv(schema: JSONSchema): EnvMap {
   }
 
   iterateOverSchemaObject(schema, '');
-  console.log(fromEnv);
+  debug('parsed environment map: %O', fromEnv); // @typedoc Log the parsed environment map
 
   return fromEnv;
 }
