@@ -191,5 +191,50 @@ describe('env', () => {
 
       expect(envValues).toEqual({ foo: { bar: 'baz' } });
     });
+
+    it('should allow to use x-env-value in an object with no properties', () => {
+      process.env.FOO = 'bar';
+      const schema = {
+        type: 'object',
+        properties: {
+          foo: { 'x-env-value': 'FOO' },
+        },
+        required: ['foo'],
+      } satisfies JSONSchema;
+
+      const envValues = getEnvValues(schema);
+
+      expect(envValues).toEqual({ foo: 'bar' });
+    });
+
+    it('should allow to use x-env-value and json format in an object with no properties', () => {
+      process.env.FOO = '{"bar": "baz"}';
+      const schema = {
+        type: 'object',
+        properties: {
+          foo: { 'x-env-value': 'FOO', 'x-env-format': 'json' },
+        },
+        required: ['foo'],
+      } satisfies JSONSchema;
+
+      const envValues = getEnvValues(schema);
+
+      expect(envValues).toEqual({ foo: { bar: 'baz' } });
+    });
+
+    it('should allow x-env-value with an enum with no string defined', () => {
+      process.env.FOO = 'bar';
+      const schema = {
+        type: 'object',
+        properties: {
+          foo: { 'x-env-value': 'FOO', enum: ['bar', 'baz'] },
+        },
+        required: ['foo'],
+      } satisfies JSONSchema;
+
+      const envValues = getEnvValues(schema);
+
+      expect(envValues).toEqual({ foo: 'bar' });
+    });
   });
 });
