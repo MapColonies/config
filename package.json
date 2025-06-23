@@ -50,7 +50,7 @@
   "dependencies": {
     "@apideck/better-ajv-errors": "^0.3.6",
     "@apidevtools/json-schema-ref-parser": "^11.6.4",
-    "@map-colonies/read-pkg": "^0.0.1",
+    "@map-colonies/read-pkg": "^1.0.0",
     "@types/lodash": "^4.17.0",
     "ajv": "^8.16.0",
     "ajv-formats": "^3.0.1",
