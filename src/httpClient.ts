@@ -33,11 +33,12 @@ async function requestWrapper(url: string, query?: Record<string, unknown>): Pro
   }
 }
 
-export async function getRemoteConfig(configName: string, version: number | 'latest'): Promise<Config> {
+export async function getRemoteConfig(configName: string, schemaId: string, version: number | 'latest'): Promise<Config> {
   debug('Fetching remote config %s@%s', configName, version);
   const { configServerUrl } = getOptions();
   const url = `${configServerUrl}/config/${configName}/${version}`;
-  const res = await requestWrapper(url, { shouldDereference: true });
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const res = await requestWrapper(url, { shouldDereference: true, schema_id: schemaId });
 
   if (res.statusCode === statusCodes.BAD_REQUEST) {
     debug('Invalid request to getConfig');
