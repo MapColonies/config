@@ -1,7 +1,7 @@
 import deepmerge from 'deepmerge';
 import { typeSymbol } from '@map-colonies/schemas/build/schemas/symbol';
 import configPkg from 'config';
-import { gt } from 'semver';
+import { gt, satisfies } from 'semver';
 import type { Registry } from 'prom-client';
 import lodash, { type GetFieldType } from 'lodash';
 import { getEnvValues } from './env';
@@ -20,6 +20,7 @@ const debug = createDebug('config');
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 const arrayMerge: deepmerge.Options['arrayMerge'] = (destinationArray, sourceArray) => sourceArray;
+const semverSatisfies = '1.x';
 
 /**
  * Retrieves the configuration based on the provided options.
@@ -45,6 +46,14 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
     // check if the server is using an older version of the schemas package
     const capabilitiesResponse = await getServerCapabilities();
 
+    if (!satisfies(capabilitiesResponse.serverVersion, semverSatisfies)) {
+      debug('server version does not satisfy the required version. remote: %s, required: %s', capabilitiesResponse.serverVersion, semverSatisfies);
+      throw createConfigError('serverVersionMismatchError', 'The server version does not satisfy the required version.', {
+        remoteServerVersion: capabilitiesResponse.serverVersion,
+        localServerVersion: semverSatisfies,
+        satisfies: semverSatisfies,
+      });
+    }
     if (ignoreServerIsOlderVersionError !== true && gt(LOCAL_SCHEMAS_PACKAGE_VERSION, capabilitiesResponse.schemasPackageVersion)) {
       debug(
         'server is using an older version of the schemas package. local: %s, remote: %s',

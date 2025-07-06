@@ -10,6 +10,7 @@ const configErrors = {
   schemasPackageVersionMismatchError: { code: 6, payload: {} as { remotePackageVersion: string; localPackageVersion: string } },
   schemaVersionMismatchError: { code: 7, payload: {} as { remoteSchemaVersion: string; localSchemaVersion: string } },
   promClientNotInstalledError: { code: 8, payload: {} as { message: string } },
+  serverVersionMismatchError: { code: 9, payload: {} as { remoteServerVersion: string; localServerVersion: string; satisfies: string } },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as const satisfies Record<string, { code: number; payload: any }>;
 
