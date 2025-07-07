@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/MapColonies/config/compare/v2.3.0...v3.0.0) (2025-07-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* changed request for new version ([#79](https://github.com/MapColonies/config/issues/79))
+
+### Features
+
+* changed request for new version ([#79](https://github.com/MapColonies/config/issues/79)) ([5bdb411](https://github.com/MapColonies/config/commit/5bdb411890632f90819824fc089504fe1a5ffb28))
+
 ## [2.3.0](https://github.com/MapColonies/config/compare/v2.2.1...v2.3.0) (2025-07-07)
 
 
