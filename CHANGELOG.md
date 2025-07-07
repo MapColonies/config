@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/MapColonies/config/compare/v2.2.1...v2.3.0) (2025-07-07)
+
+
+### Features
+
+* added a check for valid server version for the package ([#78](https://github.com/MapColonies/config/issues/78)) ([a51d6ae](https://github.com/MapColonies/config/commit/a51d6ae03f8aa88226badb64c16ed74e16279cdc))
+
 ## [2.2.1](https://github.com/MapColonies/config/compare/v2.2.0...v2.2.1) (2025-06-15)
 
 
