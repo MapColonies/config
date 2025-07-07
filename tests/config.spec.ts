@@ -353,5 +353,21 @@ describe('config', () => {
       };
       expect(action).toThrow(/Cannot assign to read only property/);
     });
+
+    it('should throw an error if the server version does not satisfy the required version', async () => {
+      client
+        .intercept({ path: '/capabilities', method: 'GET' })
+        .reply(StatusCodes.OK, { serverVersion: '0.0.1', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
+
+      const promise = config({
+        configName: 'name',
+        version: 1,
+        schema: commonDbPartialV1,
+        configServerUrl: URL,
+        localConfigPath: './tests/config',
+      });
+
+      await expect(promise).rejects.toThrow('The server version does not satisfy the required version.');
+    });
   });
 });
