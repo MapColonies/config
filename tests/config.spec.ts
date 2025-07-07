@@ -26,10 +26,12 @@ describe('config', () => {
         createdAt: 0,
       };
 
-      client.intercept({ path: '/config/name/1?shouldDereference=true', method: 'GET' }).reply(StatusCodes.OK, configData);
+      client
+        .intercept({ path: `/config/name/1?shouldDereference=true&schema_id=${commonDbPartialV1.$id}`, method: 'GET' })
+        .reply(StatusCodes.OK, configData);
       client
         .intercept({ path: '/capabilities', method: 'GET' })
-        .reply(StatusCodes.OK, { serverVersion: '1.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
+        .reply(StatusCodes.OK, { serverVersion: '2.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
 
       const configInstance = await config({
         configName: 'name',
@@ -109,10 +111,12 @@ describe('config', () => {
         createdAt: 0,
       };
 
-      client.intercept({ path: '/config/name/1?shouldDereference=true', method: 'GET' }).reply(StatusCodes.OK, configData);
+      client
+        .intercept({ path: `/config/name/1?shouldDereference=true&schema_id=${commonDbPartialV1.$id}`, method: 'GET' })
+        .reply(StatusCodes.OK, configData);
       client
         .intercept({ path: '/capabilities', method: 'GET' })
-        .reply(StatusCodes.OK, { serverVersion: '1.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
+        .reply(StatusCodes.OK, { serverVersion: '2.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
 
       const configInstance = await config({
         configName: 'name',
@@ -167,10 +171,12 @@ describe('config', () => {
         createdAt: 0,
       };
 
-      client.intercept({ path: '/config/name/1?shouldDereference=true', method: 'GET' }).reply(StatusCodes.OK, configData);
+      client
+        .intercept({ path: `/config/name/1?shouldDereference=true&schema_id=${commonDbPartialV1.$id}`, method: 'GET' })
+        .reply(StatusCodes.OK, configData);
       client
         .intercept({ path: '/capabilities', method: 'GET' })
-        .reply(StatusCodes.OK, { serverVersion: '1.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
+        .reply(StatusCodes.OK, { serverVersion: '2.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
 
       const configInstance = await config({
         configName: 'name',
@@ -227,10 +233,12 @@ describe('config', () => {
         createdAt: 0,
       };
 
-      client.intercept({ path: '/config/name/1?shouldDereference=true', method: 'GET' }).reply(StatusCodes.OK, configData);
+      client
+        .intercept({ path: `/config/name/1?shouldDereference=true&schema_id=${commonS3PartialV1.$id}`, method: 'GET' })
+        .reply(StatusCodes.OK, configData);
       client
         .intercept({ path: '/capabilities', method: 'GET' })
-        .reply(StatusCodes.OK, { serverVersion: '1.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
+        .reply(StatusCodes.OK, { serverVersion: '2.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
 
       const promise = config({
         configName: 'name',
@@ -256,10 +264,12 @@ describe('config', () => {
         createdAt: 0,
       };
 
-      client.intercept({ path: '/config/name/1?shouldDereference=true', method: 'GET' }).reply(StatusCodes.OK, configData);
+      client
+        .intercept({ path: `/config/name/1?shouldDereference=true&schema_id=${commonDbPartialV1.$id}`, method: 'GET' })
+        .reply(StatusCodes.OK, configData);
       client
         .intercept({ path: '/capabilities', method: 'GET' })
-        .reply(StatusCodes.OK, { serverVersion: '1.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
+        .reply(StatusCodes.OK, { serverVersion: '2.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
 
       const promise = config({
         configName: 'name',
@@ -275,7 +285,7 @@ describe('config', () => {
     it('should throw an error if the config server is using an older version of the schemas package', async () => {
       client
         .intercept({ path: '/capabilities', method: 'GET' })
-        .reply(StatusCodes.OK, { serverVersion: '1.0.0', schemasPackageVersion: '0.0.0', pubSubEnabled: false });
+        .reply(StatusCodes.OK, { serverVersion: '2.0.0', schemasPackageVersion: '0.0.0', pubSubEnabled: false });
 
       const promise = config({
         configName: 'name',

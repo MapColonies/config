@@ -20,7 +20,7 @@ const debug = createDebug('config');
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 const arrayMerge: deepmerge.Options['arrayMerge'] = (destinationArray, sourceArray) => sourceArray;
-const semverSatisfies = '1.x';
+const semverSatisfies = '2.x';
 
 /**
  * Retrieves the configuration based on the provided options.
@@ -71,7 +71,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
     }
 
     // get the remote config
-    serverConfigResponse = await getRemoteConfig(configName, version);
+    serverConfigResponse = await getRemoteConfig(configName, options.schema.$id, version);
 
     if (serverConfigResponse.schemaId !== baseSchema.$id) {
       debug('schema version mismatch. local: %s, remote: %s', baseSchema.$id, serverConfigResponse.schemaId);
