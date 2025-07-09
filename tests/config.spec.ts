@@ -27,7 +27,7 @@ describe('config', () => {
       };
 
       client
-        .intercept({ path: `/config/name/1?shouldDereference=true&schema_id=${commonDbPartialV1.$id}`, method: 'GET' })
+        .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
         .reply(StatusCodes.OK, configData);
       client
         .intercept({ path: '/capabilities', method: 'GET' })
@@ -112,7 +112,7 @@ describe('config', () => {
       };
 
       client
-        .intercept({ path: `/config/name/1?shouldDereference=true&schema_id=${commonDbPartialV1.$id}`, method: 'GET' })
+        .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
         .reply(StatusCodes.OK, configData);
       client
         .intercept({ path: '/capabilities', method: 'GET' })
@@ -172,7 +172,7 @@ describe('config', () => {
       };
 
       client
-        .intercept({ path: `/config/name/1?shouldDereference=true&schema_id=${commonDbPartialV1.$id}`, method: 'GET' })
+        .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
         .reply(StatusCodes.OK, configData);
       client
         .intercept({ path: '/capabilities', method: 'GET' })
@@ -234,7 +234,7 @@ describe('config', () => {
       };
 
       client
-        .intercept({ path: `/config/name/1?shouldDereference=true&schema_id=${commonS3PartialV1.$id}`, method: 'GET' })
+        .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonS3PartialV1.$id}`, method: 'GET' })
         .reply(StatusCodes.OK, configData);
       client
         .intercept({ path: '/capabilities', method: 'GET' })
@@ -265,7 +265,7 @@ describe('config', () => {
       };
 
       client
-        .intercept({ path: `/config/name/1?shouldDereference=true&schema_id=${commonDbPartialV1.$id}`, method: 'GET' })
+        .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
         .reply(StatusCodes.OK, configData);
       client
         .intercept({ path: '/capabilities', method: 'GET' })

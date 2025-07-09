@@ -38,7 +38,7 @@ export async function getRemoteConfig(configName: string, schemaId: string, vers
   const { configServerUrl } = getOptions();
   const url = `${configServerUrl}/config/${configName}/${version}`;
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const res = await requestWrapper(url, { shouldDereference: true, schema_id: schemaId });
+  const res = await requestWrapper(url, { shouldDereference: true, schemaId });
 
   if (res.statusCode === statusCodes.BAD_REQUEST) {
     debug('Invalid request to getConfig');

@@ -58,7 +58,7 @@ describe('httpClient', () => {
         createdAt: 0,
       };
 
-      client.intercept({ path: '/config/name/1?shouldDereference=true&schema_id=schema', method: 'GET' }).reply(StatusCodes.OK, config);
+      client.intercept({ path: '/config/name/1?shouldDereference=true&schemaId=schema', method: 'GET' }).reply(StatusCodes.OK, config);
 
       const result = await getRemoteConfig('name', 'schema', 1);
       expect(result).toEqual(config);
@@ -66,28 +66,28 @@ describe('httpClient', () => {
 
     it('should throw an error if the response is bad request', async () => {
       client
-        .intercept({ path: '/config/name/1?shouldDereference=true&schema_id=schema', method: 'GET' })
+        .intercept({ path: '/config/name/1?shouldDereference=true&schemaId=schema', method: 'GET' })
         .reply(StatusCodes.BAD_REQUEST, 'Bad request');
 
       await expect(getRemoteConfig('name', 'schema', 1)).rejects.toThrow('Invalid request to getConfig');
     });
 
     it('should throw an error if the response is not found', async () => {
-      client.intercept({ path: '/config/name/1?shouldDereference=true&schema_id=schema', method: 'GET' }).reply(StatusCodes.NOT_FOUND, 'Not found');
+      client.intercept({ path: '/config/name/1?shouldDereference=true&schemaId=schema', method: 'GET' }).reply(StatusCodes.NOT_FOUND, 'Not found');
 
       await expect(getRemoteConfig('name', 'schema', 1)).rejects.toThrow('Config with given name and version was not found');
     });
 
     it('should throw an error if the request fails', async () => {
       client
-        .intercept({ path: '/config/name/1?shouldDereference=true&schema_id=schema', method: 'GET' })
+        .intercept({ path: '/config/name/1?shouldDereference=true&schemaId=schema', method: 'GET' })
         .reply(StatusCodes.INTERNAL_SERVER_ERROR, 'Internal Server Error');
 
       await expect(getRemoteConfig('name', 'schema', 1)).rejects.toThrow('Failed to fetch');
     });
 
     it('should throw an error if the request fails to be sent', async () => {
-      client.intercept({ path: '/config/name/1?shouldDereference=true&schema_id=schema', method: 'GET' }).replyWithError(new Error('oh noes'));
+      client.intercept({ path: '/config/name/1?shouldDereference=true&schemaId=schema', method: 'GET' }).replyWithError(new Error('oh noes'));
 
       await expect(getRemoteConfig('name', 'schema', 1)).rejects.toThrow('An error occurred while making the request');
     });
