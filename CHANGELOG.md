@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/MapColonies/config/compare/v3.0.0...v3.0.1) (2025-07-10)
+
+
+### Bug Fixes
+
+* set the proper schema query according to config-server ([#82](https://github.com/MapColonies/config/issues/82)) ([0866abb](https://github.com/MapColonies/config/commit/0866abb5f47987095ad5a3461228a4d59c0b02ce))
+
 ## [3.0.0](https://github.com/MapColonies/config/compare/v2.3.0...v3.0.0) (2025-07-07)
 
 
