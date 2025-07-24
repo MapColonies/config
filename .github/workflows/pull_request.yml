@@ -13,6 +13,8 @@ jobs:
 
       - name: Initialize npm environment
         uses: ./.github/actions/init-npm
+        with:
+          skip-build: true
 
       - name: Run TS Project linters
         run: npm run lint
@@ -21,7 +23,7 @@ jobs:
     
     strategy:
       matrix:
-        node: [20.x, 22.x]
+        node: [20.x, 22.x, 24.x]
         os: [ubuntu-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
@@ -37,6 +39,7 @@ jobs:
 
       - name: Run tests
         run: npm run test
+
   upload_package:
     needs: [lint]
     runs-on: ubuntu-latest
