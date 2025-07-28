@@ -34,8 +34,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Initialize npm environment
         uses: ./.github/actions/init-npm
-      - name: build the package
-        run: npm run build
+        with:
+          skip-build: true
       - name: build docs
         run: npm run docs
       - name: Setup Pages

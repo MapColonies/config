@@ -12,7 +12,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Initialize npm environment
         uses: ./.github/actions/init-npm
-      - run: npm run build
       - uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.NPM_TOKEN }}
