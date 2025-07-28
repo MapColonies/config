@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.2](https://github.com/MapColonies/config/compare/v3.0.1...v3.0.2) (2025-07-28)
+
+
+### Build System
+
+* removed cz-con-changelog and npm run build steps ([#84](https://github.com/MapColonies/config/issues/84)) ([8b4c3de](https://github.com/MapColonies/config/commit/8b4c3deed4542936a480f3da1dce8c38a5d1d5d6))
+
 ## [3.0.1](https://github.com/MapColonies/config/compare/v3.0.0...v3.0.1) (2025-07-10)
 
 
