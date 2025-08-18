@@ -9,7 +9,7 @@ jobs:
 
     steps:
       - name: Check out TS Project Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Initialize npm environment
         uses: ./.github/actions/init-npm
@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Check out TS Project Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: Init nodejs
         uses: ./.github/actions/init-npm
@@ -46,7 +46,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Check out TS Project Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Initialize npm environment
         uses: ./.github/actions/init-npm
       - name: Pack the package
