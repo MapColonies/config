@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.3](https://github.com/MapColonies/config/compare/v3.0.2...v3.0.3) (2025-11-11)
+
+
+### Dependency Updates
+
+* bump ajv from 8.16.0 to 8.17.1 ([#44](https://github.com/MapColonies/config/issues/44)) ([fc4c3ba](https://github.com/MapColonies/config/commit/fc4c3baed5aa8e431c2c4db5446c00f2df52b168))
+
 ## [3.0.2](https://github.com/MapColonies/config/compare/v3.0.1...v3.0.2) (2025-07-28)
 
 
