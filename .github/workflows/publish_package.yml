@@ -9,7 +9,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Initialize npm environment
         uses: ./.github/actions/init-npm
       - uses: JS-DevTools/npm-publish@v3
