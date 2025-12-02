@@ -94,7 +94,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
   const localConfig = configPkg.util.loadFileConfigs(options.localConfigPath) as { [key: string]: unknown };
   debug('local config: %j', localConfig);
 
-  const envConfig = getEnvValues(dereferencedSchema);
+  const [envConfig, populateEnv] = getEnvValues(dereferencedSchema);
   debug('env config: %j', envConfig);
 
   // merge all the configs into one object with the following priority: localConfig < remoteConfig < envConfig
@@ -111,6 +111,14 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
   debug('freezing validated config');
   // freeze the merged config so it can't be modified by the package user
   deepFreeze(validatedConfig);
+
+  for (const [key, envKey] of Object.entries(populateEnv)) {
+    const envValue = lodash.get(validatedConfig, key) as string | undefined;
+    if (envValue !== undefined) {
+      debug('populating env value for key %s from config path %s', envKey, key);
+      process.env[envKey] = String(envValue);
+    }
+  }
 
   function get<TPath extends string>(path: TPath): GetFieldType<T[typeof typeSymbol], TPath> {
     debug('get called with path: %s', path);

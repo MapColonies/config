@@ -7,13 +7,15 @@ const debug = createDebug('env');
 
 const schemaCompositionKeys = ['oneOf', 'anyOf', 'allOf'] as const;
 
-function parseSchemaEnv(schema: JSONSchema): EnvMap {
+function parseSchemaEnv(schema: JSONSchema): [EnvMap, Record<string, string>] {
   debug('parsing schema for env values');
   const fromEnv: EnvMap = {};
+  const populateEnv: Record<string, string> = {};
 
   function handlePossibleEnvValue(schema: JSONSchema, path: string): void {
     debug('handling possible env value at path %s', path);
     const xEnvValueFrom = (schema as { 'x-env-value'?: string })['x-env-value'];
+    const xPopulateEnv = (schema as { 'x-populate-as-env'?: boolean })['x-populate-as-env'];
 
     const isPrimitive = ['string', 'number', 'integer', 'boolean', 'null'].includes(schema.type as string);
 
@@ -21,6 +23,11 @@ function parseSchemaEnv(schema: JSONSchema): EnvMap {
 
     if (xEnvValueFrom === undefined) {
       return;
+    }
+
+    if (xPopulateEnv === true) {
+      debug('found x-populate-as-env at path %s', path);
+      populateEnv[path] = xEnvValueFrom;
     }
 
     if (isFormatJson) {
@@ -87,13 +94,13 @@ function parseSchemaEnv(schema: JSONSchema): EnvMap {
   iterateOverSchemaObject(schema, '');
   debug('parsed environment map: %O', fromEnv); // @typedoc Log the parsed environment map
 
-  return fromEnv;
+  return [fromEnv, populateEnv];
 }
 
-export function getEnvValues(schema: JSONSchema): object {
+export function getEnvValues(schema: JSONSchema): [object, Record<string, string>] {
   const res = {};
 
-  const envMap = parseSchemaEnv(schema);
+  const [envMap, populateEnv] = parseSchemaEnv(schema);
 
   for (const [key, details] of Object.entries(envMap)) {
     const unparsedValue = process.env[key];
@@ -133,5 +140,5 @@ export function getEnvValues(schema: JSONSchema): object {
     }
   }
 
-  return res;
+  return [res, populateEnv];
 }
