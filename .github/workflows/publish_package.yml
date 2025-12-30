@@ -1,17 +1,19 @@
+name: publish
+
 on:
   workflow_dispatch:
-  release: 
+  release:
     types: [published]
-    
+
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - name: Initialize npm environment
+      - uses: actions/checkout@v6
+      - name: Init nodejs
         uses: ./.github/actions/init-npm
-      - uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
+      - run: npm publish --access public
