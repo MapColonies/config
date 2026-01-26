@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, afterAll } from 'vitest';
 import { JSONSchema } from '@apidevtools/json-schema-ref-parser';
 import { getEnvValues } from '../src/env';
 import { EnvType } from '../src/types';

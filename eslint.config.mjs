@@ -1,9 +1,12 @@
 import tsBaseConfig from '@map-colonies/eslint-config/ts-base';
-import jestConfig from '@map-colonies/eslint-config/jest';
-import { config } from '@map-colonies/eslint-config/helpers';
+import { defineConfig } from 'eslint/config';
 
-export default config(jestConfig, tsBaseConfig, {
-  rules: {
-    '@typescript-eslint/no-require-imports': 'off',
+export default defineConfig(
+  tsBaseConfig,
+  {
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
   },
-});
+  { ignores: ['vitest.config.mts'] }
+);

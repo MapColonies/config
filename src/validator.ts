@@ -29,7 +29,7 @@ function enrichErrors(betterErrors: ValidationError[], errors: ErrorObject[]): (
     switch (error.context.errorType) {
       case 'unevaluatedProperties': {
         const originalError = errors[index];
-        if (!originalError || originalError.keyword !== 'unevaluatedProperties') {
+        if (originalError?.keyword !== 'unevaluatedProperties') {
           return error;
         }
         return {

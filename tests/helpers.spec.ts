@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import 'jest-extended';
 import { deepFreeze } from '../src/utils/helpers';
 
