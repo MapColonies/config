@@ -1,6 +1,6 @@
 {
   "name": "@map-colonies/config",
-  "version": "3.0.2",
+  "version": "4.0.0",
   "description": "Config package for MapColonies with support for central config management",
   "main": "dist/index.js",
   "exports": {
@@ -20,7 +20,7 @@
     "pretest": "npm run generate:version",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:ui": "vitest --ui",    
+    "test:ui": "vitest --ui",
     "prebuild": "npm run clean && npm run generate:version",
     "build": "tsc --project tsconfig.build.json",
     "start": "npm run build && cd dist && node ./index.js",

@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.0.0](https://github.com/MapColonies/config/compare/v3.0.2...v4.0.0) (2026-01-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* modernized deps and moved to node 24 ([#105](https://github.com/MapColonies/config/issues/105))
+
+### Features
+
+* modernized deps and moved to node 24 ([#105](https://github.com/MapColonies/config/issues/105)) ([755d8e1](https://github.com/MapColonies/config/commit/755d8e1f64abb4a019d5d695fa2cf2fb708c9707))
+
+
+### Dependency Updates
+
+* bump ajv from 8.16.0 to 8.17.1 ([#44](https://github.com/MapColonies/config/issues/44)) ([fc4c3ba](https://github.com/MapColonies/config/commit/fc4c3baed5aa8e431c2c4db5446c00f2df52b168))
+
 ## [3.0.2](https://github.com/MapColonies/config/compare/v3.0.1...v3.0.2) (2025-07-28)
 
 
