@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import type { JSONSchema } from '@apidevtools/json-schema-ref-parser';
 import { loadSchema } from '../src/schemas';
 

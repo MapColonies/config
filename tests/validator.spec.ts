@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { validate, ajvOptionsValidator, ajvConfigValidator } from '../src/validator';
 
 describe('validator', () => {

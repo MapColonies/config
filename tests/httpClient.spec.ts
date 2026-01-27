@@ -1,14 +1,15 @@
+import { beforeEach, describe, expect, it, type MockedFunction, vi } from 'vitest';
 import { Interceptable, MockAgent, setGlobalDispatcher } from 'undici';
 import { StatusCodes } from 'http-status-codes';
 import { getRemoteConfig, getServerCapabilities } from '../src/httpClient';
 import { getOptions } from '../src/options';
 import { BaseOptions } from '../src/types';
 
-jest.mock('../src/options');
+vi.mock('../src/options');
 
 const URL = 'http://localhost:8080';
 
-const mockedGetOptions = getOptions as jest.MockedFunction<typeof getOptions>;
+const mockedGetOptions = getOptions as MockedFunction<typeof getOptions>;
 
 mockedGetOptions.mockReturnValue({
   configServerUrl: URL,

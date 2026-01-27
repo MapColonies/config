@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, type MockedFunction, vi } from 'vitest';
 import { Registry } from 'prom-client';
 import { getOptions } from '../src/options';
 import { BaseOptions } from '../src/types';
@@ -5,9 +6,9 @@ import { initializeMetrics } from '../src/metrics';
 import { PACKAGE_VERSION } from '../src/version';
 import { LOCAL_SCHEMAS_PACKAGE_VERSION } from '../src/constants';
 
-jest.mock('../src/options');
+vi.mock('../src/options');
 
-const mockedGetOptions = getOptions as jest.MockedFunction<typeof getOptions>;
+const mockedGetOptions = getOptions as MockedFunction<typeof getOptions>;
 
 mockedGetOptions.mockReturnValue({
   offlineMode: false,

@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Interceptable, MockAgent, setGlobalDispatcher } from 'undici';
 import { commonDbPartialV1, commonS3PartialV1 } from '@map-colonies/schemas';
 import { StatusCodes } from 'http-status-codes';
@@ -138,12 +139,12 @@ describe('config', () => {
     });
 
     it('should override values with env values', async () => {
-      jest.resetModules();
+      vi.resetModules();
       process.env.S3_ACCESS_KEY = 'access';
       process.env.S3_SECRET_KEY = 'secret';
       process.env.S3_ENDPOINT = 'http://localhost:9000';
 
-      const { config } = require('../src/config') as typeof import('../src/config');
+      const { config } = (await import('../src/config.js')) as typeof import('../src/config');
       const configInstance = await config({
         configName: 'name',
         version: 1,
