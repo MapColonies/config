@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/MapColonies/config/compare/v4.0.0...v4.0.1) (2026-02-03)
+
+
+### Build System
+
+* fixed broken tsconfig ([#108](https://github.com/MapColonies/config/issues/108)) ([0047528](https://github.com/MapColonies/config/commit/0047528300ad82b761622634fa641da60b51cc68))
+
 ## [4.0.0](https://github.com/MapColonies/config/compare/v3.0.2...v4.0.0) (2026-01-27)
 
 
