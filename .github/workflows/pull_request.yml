@@ -59,7 +59,7 @@ jobs:
       - uses: azure/CLI@v2
         with:
           inlineScript: |
-            az storage blob upload --name config-$GITHUB_SHA.tgz --account-name ghatmpstorage --container-name=npm-packages --file map-colonies-config-${{steps.json_properties.outputs.version}}.tgz --sas-token "${{ secrets.SAS_TOKEN }}"
+            az storage blob upload --name config-${{ github.sha }}.tgz --account-name ghatmpstorage --container-name=npm-packages --file map-colonies-config-${{steps.json_properties.outputs.version}}.tgz --sas-token "${{ secrets.SAS_TOKEN }}"
       - name: Comment on PR
         uses: thollander/actions-comment-pull-request@v3
         with:
