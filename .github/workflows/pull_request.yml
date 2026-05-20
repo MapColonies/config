@@ -61,7 +61,7 @@ jobs:
           AZURE_STORAGE_SAS_TOKEN: ${{ secrets.SAS_TOKEN }}
         with:
           inlineScript: |
-            az storage blob upload --name config-$GITHUB_SHA.tgz --account-name ghatmpstorage --container-name=npm-packages --file map-colonies-config-${{steps.json_properties.outputs.version}}.tgz
+            az storage blob upload --name config-$GITHUB_SHA.tgz --account-name ghatmpstorage --container-name=npm-packages --file map-colonies-config-${{steps.json_properties.outputs.version}}.tgz --sas-token "${{ secrets.SAS_TOKEN }}
       - name: Comment on PR
         uses: thollander/actions-comment-pull-request@v3
         with:
