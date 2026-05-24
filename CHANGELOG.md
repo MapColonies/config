@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.2](https://github.com/MapColonies/config/compare/v4.0.1...v4.0.2) (2026-05-24)
+
+
+### Dependency Updates
+
+* bump @apidevtools/json-schema-ref-parser from 11.6.4 to 15.3.5 ([#90](https://github.com/MapColonies/config/issues/90)) ([e3ea9b2](https://github.com/MapColonies/config/commit/e3ea9b2d07e565a5388fee406b61d758c622d07e))
+
 ## [4.0.1](https://github.com/MapColonies/config/compare/v4.0.0...v4.0.1) (2026-02-03)
 
 
