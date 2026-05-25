@@ -84,7 +84,7 @@
     "@types/node": "^24.0.0",
     "@types/semver": "^7.5.8",
     "commitlint": "^19.6.1",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "husky": "^9.1.7",
     "jest-extended": "^4.0.2",
