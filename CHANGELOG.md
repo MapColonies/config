@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.0.2](https://github.com/MapColonies/config/compare/v4.0.1...v4.0.2) (2026-06-01)
+
+
+### Dependency Updates
+
+* bump @apideck/better-ajv-errors ([#115](https://github.com/MapColonies/config/issues/115)) ([2718f25](https://github.com/MapColonies/config/commit/2718f2594ca14cfec207ebeabb6620e8229389ed))
+* bump @apidevtools/json-schema-ref-parser from 11.6.4 to 15.3.5 ([#90](https://github.com/MapColonies/config/issues/90)) ([e3ea9b2](https://github.com/MapColonies/config/commit/e3ea9b2d07e565a5388fee406b61d758c622d07e))
+* bump config and @types/config ([#124](https://github.com/MapColonies/config/issues/124)) ([f01bb4b](https://github.com/MapColonies/config/commit/f01bb4bceb94bc7718799d872d4b5b157361a119))
+
 ## [4.0.1](https://github.com/MapColonies/config/compare/v4.0.0...v4.0.1) (2026-02-03)
 
 
