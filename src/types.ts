@@ -66,6 +66,11 @@ export interface BaseOptions {
    * @default './config'
    */
   localConfigPath?: string;
+  /**
+   * The polling interval in milliseconds.
+   * @default 30000
+   */
+  pollIntervalMs?: number;
 }
 
 /**
@@ -82,6 +87,10 @@ export type ConfigOptions<T extends SchemaWithType> = Prettify<
      * Depends on the prom-client package being installed.
      */
     metricsRegistry?: Registry;
+    /**
+     * The callback function that is triggered when the configuration changes.
+     */
+    onChange?: (config: unknown) => void | Promise<void>;
   }
 >;
 
@@ -101,16 +110,20 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
     offlineMode: { type: 'boolean', nullable: true },
     ignoreServerIsOlderVersionError: { type: 'boolean', nullable: true },
     localConfigPath: { type: 'string', default: './config', nullable: true },
+    pollIntervalMs: { type: 'integer', default: 30000, nullable: true },
   },
 };
 
 /**
- * Represents the schema of the configuration object.
+ * Represents a live configuration instance.
+ * When hot-reloading is enabled, this instance acts as a state machine that updates its internal
+ * configuration state dynamically.
  * @template T - The type of the configuration schema.
  */
 export interface ConfigInstance<T> {
   /**
    * Retrieves the value at the specified path from the configuration object.
+   * If hot-reloading is active, this returns the value from the most recent configuration update.
    * @template TPath - The type of the path.
    * @param path - The path to the desired value.
    * @returns The value at the specified path.
@@ -119,12 +132,14 @@ export interface ConfigInstance<T> {
 
   /**
    * Retrieves the entire configuration object.
+   * If hot-reloading is active, this returns the most recent configuration state.
    * @returns The entire configuration object.
    */
   getAll: () => T;
 
   /**
    * Retrieves different parts of the configuration object before being merged and validated.
+   * If hot-reloading is active, 'config' reflects the latest remote payload.
    * @returns An object containing the localConfig, config, and envConfig parts of the configuration.
    */
   getConfigParts: () => {
