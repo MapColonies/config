@@ -15,10 +15,10 @@ async function createHttpErrorPayload(res: Dispatcher.ResponseData): Promise<Con
   };
 }
 
-async function requestWrapper(url: string, query?: Record<string, unknown>): Promise<Dispatcher.ResponseData> {
+async function requestWrapper(url: string, options: Parameters<typeof request<null>>[1] = undefined): Promise<Dispatcher.ResponseData> {
   debug('Making request to %s', url);
   try {
-    const res = await request(url, { query });
+    const res = await request(url, options);
     if (res.statusCode > statusCodes.NOT_FOUND) {
       debug('Failed to fetch config. Status code: %d', res.statusCode);
       throw createConfigError('httpResponseError', 'Failed to fetch', await createHttpErrorPayload(res));
@@ -33,12 +33,25 @@ async function requestWrapper(url: string, query?: Record<string, unknown>): Pro
   }
 }
 
-export async function getRemoteConfig(configName: string, schemaId: string, version: number | 'latest'): Promise<Config> {
+export async function getRemoteConfig(
+  configName: string,
+  schemaId: string,
+  version: number | 'latest',
+  etag?: string
+): Promise<{ config: Config | null; etag: string }> {
   debug('Fetching remote config %s@%s', configName, version);
   const { configServerUrl } = getOptions();
   const url = `${configServerUrl}/config/${configName}/${version}`;
 
-  const res = await requestWrapper(url, { shouldDereference: true, schemaId });
+  const headers = etag !== undefined ? { 'If-None-Match': etag } : undefined;
+  const queryParams = { schemaId, shouldDereference: 'true' };
+
+  const res = await requestWrapper(url, { query: queryParams, headers });
+
+  if (res.statusCode === statusCodes.NOT_MODIFIED) {
+    debug('Config was not modified');
+    return { config: null, etag: etag! };
+  }
 
   if (res.statusCode === statusCodes.BAD_REQUEST) {
     debug('Invalid request to getConfig');
@@ -51,7 +64,7 @@ export async function getRemoteConfig(configName: string, schemaId: string, vers
   }
   debug('Config fetched successfully');
 
-  return (await res.body.json()) as Config;
+  return { config: (await res.body.json()) as Config, etag: res.headers.etag as string };
 }
 
 export async function getServerCapabilities(): Promise<ServerCapabilities> {

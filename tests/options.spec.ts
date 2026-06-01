@@ -73,6 +73,7 @@ describe('options', () => {
       ['version', 'CONFIG_VERSION', 'latest', 'latest'],
       ['offlineMode', 'CONFIG_OFFLINE_MODE', 'true', true],
       ['ignoreServerIsOlderVersionError', 'CONFIG_IGNORE_SERVER_IS_OLDER_VERSION_ERROR', 'true', true],
+      ['pollIntervalMs', 'CONFIG_POLL_INTERVAL_MS', '10000', 10000],
     ])('should initialize options and override with provided environment variable %s', async (key, envKey, envValue, expected) => {
       process.env[envKey] = envValue;
 

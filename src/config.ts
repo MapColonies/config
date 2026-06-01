@@ -15,6 +15,7 @@ import { LOCAL_SCHEMAS_PACKAGE_VERSION } from './constants';
 import { createConfigError } from './errors';
 import { initializeMetrics as initializeMetricsInternal } from './metrics';
 import { deepFreeze } from './utils/helpers';
+import { ChangeDetector } from './rollout/ChangeDetector';
 
 const debug = createDebug('config');
 
@@ -25,22 +26,56 @@ const semverSatisfies = '2.x';
 /**
  * Retrieves the configuration based on the provided options.
  *
+ * If `onChange` is provided in the options and `offlineMode` is not enabled, the SDK starts a background
+ * polling mechanism. The returned `ConfigInstance` serves as a live state machine; its `get` and `getAll`
+ * methods will return the most recent configuration retrieved from the server during hot-reloads.
+ *
  * @template T - The type of the configuration schema.
  * @param {ConfigOptions<T>} options - The options for retrieving the configuration.
- * @returns {Promise<ConfigInstance<T>>} - A promise that resolves to the configuration object.
+ * @returns {Promise<ConfigInstance<T[typeof typeSymbol]>>} - A promise that resolves to the configuration object.
  */
 export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
   options: ConfigOptions<T>
 ): Promise<ConfigInstance<T[typeof typeSymbol]>> {
   // handle package options
   debug('config called with options: %j', { ...options, schema: options.schema.$id });
-  const { schema: baseSchema, metricsRegistry, ...unvalidatedOptions } = options;
-  const { configName, offlineMode, version, ignoreServerIsOlderVersionError } = initializeOptions(unvalidatedOptions);
+  const { schema: baseSchema, metricsRegistry, onChange, ...unvalidatedOptions } = options;
+  const initOptions = initializeOptions(unvalidatedOptions);
+  const { configName, offlineMode, version, ignoreServerIsOlderVersionError } = initOptions;
+
+  // Load Local and Env Configs First (Independent of remote state)
+  const dereferencedSchema = await loadSchema(baseSchema);
+  const localConfig = configPkg.util.loadFileConfigs(options.localConfigPath) as { [key: string]: unknown };
+  debug('local config: %j', localConfig);
+  const envConfig = getEnvValues(dereferencedSchema);
+  debug('env config: %j', envConfig);
+
+  /**
+   * Function to merge local, remote, and environment configs and validate the merged result against the schema.
+   * The precedence order for merging is: local < remote < environment.
+   */
+  function mergeAndValidate(remoteConfig: object | T): unknown {
+    const mergedConfig = deepmerge.all([localConfig, remoteConfig, envConfig], { arrayMerge });
+    debug('merged config: %j', mergedConfig);
+
+    // validate the merged config
+    const [errors, validatedConfig] = validate(ajvConfigValidator, dereferencedSchema, mergedConfig);
+    if (errors) {
+      debug('config validation error: %j', errors);
+      throw createConfigError('configValidationError', 'Config validation error', errors);
+    }
+
+    debug('freezing validated config');
+    // freeze the merged config so it can't be modified by the package user and to ensure that the config instance always returns the same reference for the same config, which is important for change detection and to prevent unnecessary re-renders in case the config is used in a React application and the user is using the getConfigParts method to get the config and pass it to their components
+    deepFreeze(validatedConfig);
+    return validatedConfig;
+  }
 
   let remoteConfig: object | T = {};
-
   let serverConfigResponse: Config | undefined = undefined;
-  // handle remote config
+  let validatedConfig: ReturnType<typeof mergeAndValidate>;
+
+  // Handle Remote Config and Polling
   if (offlineMode !== true) {
     debug('handling fetching remote data');
     // check if the server is using an older version of the schemas package
@@ -70,8 +105,10 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
       );
     }
 
-    // get the remote config
-    serverConfigResponse = await getRemoteConfig(configName, options.schema.$id, version);
+    // get the initial remote config
+    const remoteResponse = await getRemoteConfig(configName, options.schema.$id, version);
+    serverConfigResponse = remoteResponse.config!;
+    const currentEtag = remoteResponse.etag;
 
     if (serverConfigResponse.schemaId !== baseSchema.$id) {
       debug('schema version mismatch. local: %s, remote: %s', baseSchema.$id, serverConfigResponse.schemaId);
@@ -86,31 +123,29 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
     }
 
     remoteConfig = serverConfigResponse.config;
+    debug('remote config: %j', remoteConfig);
+
+    validatedConfig = mergeAndValidate(remoteConfig);
+
+    // Setup polling
+    if (onChange) {
+      const changeDetector = new ChangeDetector(
+        baseSchema.$id,
+        initOptions,
+        async (newRemoteConfig: object) => {
+          const newlyValidatedConfig = mergeAndValidate(newRemoteConfig);
+          validatedConfig = newlyValidatedConfig;
+          remoteConfig = newRemoteConfig;
+          await onChange(newlyValidatedConfig);
+        },
+        currentEtag
+      );
+      changeDetector.start();
+    }
+  } else {
+    // If offline, bypass remote and just merge local/env
+    validatedConfig = mergeAndValidate({});
   }
-  debug('remote config: %j', remoteConfig);
-
-  const dereferencedSchema = await loadSchema(baseSchema);
-
-  const localConfig = configPkg.util.loadFileConfigs(options.localConfigPath) as { [key: string]: unknown };
-  debug('local config: %j', localConfig);
-
-  const envConfig = getEnvValues(dereferencedSchema);
-  debug('env config: %j', envConfig);
-
-  // merge all the configs into one object with the following priority: localConfig < remoteConfig < envConfig
-  const mergedConfig = deepmerge.all([localConfig, remoteConfig, envConfig], { arrayMerge });
-  debug('merged config: %j', mergedConfig);
-
-  // validate the merged config
-  const [errors, validatedConfig] = validate(ajvConfigValidator, dereferencedSchema, mergedConfig);
-  if (errors) {
-    debug('config validation error: %j', errors);
-    throw createConfigError('configValidationError', 'Config validation error', errors);
-  }
-
-  debug('freezing validated config');
-  // freeze the merged config so it can't be modified by the package user
-  deepFreeze(validatedConfig);
 
   function get<TPath extends string>(path: TPath): GetFieldType<T[typeof typeSymbol], TPath> {
     debug('get called with path: %s', path);

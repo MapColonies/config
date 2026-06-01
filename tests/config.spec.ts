@@ -210,6 +210,7 @@ describe('config', () => {
         configServerUrl: URL,
         localConfigPath: './tests/config',
         offlineMode: true,
+        pollIntervalMs: 3000,
       });
 
       const options = configInstance.getResolvedOptions();
@@ -220,6 +221,7 @@ describe('config', () => {
         configServerUrl: URL,
         localConfigPath: './tests/config',
         offlineMode: true,
+        pollIntervalMs: 3000,
       });
     });
 
