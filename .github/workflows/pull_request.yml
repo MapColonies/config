@@ -42,6 +42,8 @@ jobs:
 
   upload_package:
     needs: [lint]
+    # PRs created by dependabot do not get the SAS_TOKEN secret, so we need to skip this job in these cases to avoid failures 
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
