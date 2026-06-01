@@ -46,7 +46,7 @@ export function initializeMetrics(registry: Registry, schemaId: string, actualVe
       name: configName,
       request_version: version,
       actual_version: actualVersion,
-      offline_mode: String(offlineMode ?? false),
+      offline_mode: String(offlineMode),
       schemas_package_version: LOCAL_SCHEMAS_PACKAGE_VERSION,
       package_version: PACKAGE_VERSION,
       schema_id: schemaId,

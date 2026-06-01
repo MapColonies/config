@@ -11,6 +11,7 @@ const configErrors = {
   schemaVersionMismatchError: { code: 7, payload: {} as { remoteSchemaVersion: string; localSchemaVersion: string } },
   promClientNotInstalledError: { code: 8, payload: {} as { message: string } },
   serverVersionMismatchError: { code: 9, payload: {} as { remoteServerVersion: string; localServerVersion: string; satisfies: string } },
+  onChangeCallbackMissingError: { code: 10, payload: {} },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as const satisfies Record<string, { code: number; payload: any }>;
 
