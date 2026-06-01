@@ -159,4 +159,9 @@ export interface ConfigInstance<T> {
    * @param registry - The registry for the metrics.
    */
   initializeMetrics: (registry: Registry) => void;
+
+  /**
+   * Stops any background processes (like hot-reloading polling).
+   */
+  stop: () => void;
 }

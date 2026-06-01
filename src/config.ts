@@ -71,6 +71,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
     return validatedConfig;
   }
 
+  let changeDetector: ChangeDetector | undefined = undefined;
   let remoteConfig: object | T = {};
   let serverConfigResponse: Config | undefined = undefined;
   let validatedConfig: ReturnType<typeof mergeAndValidate>;
@@ -129,7 +130,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
 
     // Setup polling
     if (onChange) {
-      const changeDetector = new ChangeDetector(
+      changeDetector = new ChangeDetector(
         baseSchema.$id,
         initOptions,
         async (newRemoteConfig: object) => {
@@ -175,5 +176,12 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
     initializeMetricsInternal(registry, baseSchema.$id, serverConfigResponse?.version);
   }
 
-  return { get, getAll, getConfigParts, getResolvedOptions, initializeMetrics };
+  function stop(): void {
+    debug('stop called');
+    if (changeDetector) {
+      changeDetector.stop();
+    }
+  }
+
+  return { get, getAll, getConfigParts, getResolvedOptions, initializeMetrics, stop };
 }

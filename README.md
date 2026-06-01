@@ -76,6 +76,9 @@ The `ConfigInstance` interface represents your way to interact with the configur
 - **Parameters**:
   - `registry` (`promClient.Registry`): The prometheus registry to use for the metrics.
 
+##### `stop(): void`
+- **Description**: Stops any background processes (like hot-reloading polling). Use this during application teardown or in tests to prevent memory leaks and hanging processes.
+
 # Configuration Options
 
 This package allows you to configure various options for loading and managing configurations. Below are the available options and their descriptions.
