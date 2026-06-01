@@ -12,6 +12,7 @@ const debug = createDebug('changeDetector');
 export class ChangeDetector {
   private currentEtag: string;
   private timer?: NodeJS.Timeout;
+  private readonly etagBlackList: Set<string> = new Set();
 
   public constructor(
     private readonly schemaId: string,
@@ -68,8 +69,21 @@ export class ChangeDetector {
       return;
     }
 
+    const newEtag = response.etag;
+    if (this.etagBlackList.has(newEtag)) {
+      debug('Detected quarantined etag %s. Skipping update.', newEtag);
+      this.currentEtag = newEtag;
+      return;
+    }
+
     debug('Config change detected');
-    this.currentEtag = response.etag!;
-    await this.onConfigUpdate(response.config.config);
+    try {
+      await this.onConfigUpdate(response.config.config);
+      this.currentEtag = newEtag;
+    } catch (err) {
+      debug('Error applying configuration for etag %s. Adding to poison pills. Error: %s', newEtag, (err as Error).message);
+      this.etagBlackList.add(newEtag);
+      this.currentEtag = newEtag;
+    }
   }
 }

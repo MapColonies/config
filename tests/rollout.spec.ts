@@ -266,4 +266,75 @@ describe('Continuous Polling (ChangeDetector)', () => {
     // Assert
     expect(onChangeMock).not.toHaveBeenCalled();
   });
+
+  it('should quarantine a failing ETag and not retry it', async () => {
+    // Arrange
+    const initialConfigData = {
+      configName: 'name',
+      schemaId: commonDbPartialV1.$id,
+      version: 1,
+      config: { host: 'initial-host' },
+      createdAt: 0,
+    };
+    const badConfigData = {
+      configName: 'name',
+      schemaId: commonDbPartialV1.$id,
+      version: 1,
+      config: { host: 'bad-host' },
+      createdAt: 1,
+    };
+
+    client
+      .intercept({ path: '/capabilities', method: 'GET' })
+      .reply(StatusCodes.OK, { serverVersion: '2.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
+    client
+      .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
+      .reply(StatusCodes.OK, initialConfigData, { headers: { etag: 'initial-etag' } });
+
+    const onChangeMock = vi.fn().mockImplementation((conf) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (conf.host === 'bad-host') {
+        throw new Error('Boom!');
+      }
+    });
+
+    const configInstance = await config({
+      configName: 'name',
+      version: 1,
+      schema: commonDbPartialV1,
+      configServerUrl: URL,
+      localConfigPath: './tests/config',
+      pollIntervalMs: DEFAULT_POLL_INTERVAL,
+      onChange: onChangeMock,
+    });
+
+    // Act (Trigger poll with bad config)
+    client
+      .intercept({
+        path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`,
+        method: 'GET',
+        headers: { 'if-none-match': 'initial-etag' },
+      })
+      .reply(StatusCodes.OK, badConfigData, { headers: { etag: 'bad-etag' } });
+
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE));
+
+    // Assert (Fails once and is quarantined)
+    expect(onChangeMock).toHaveBeenCalledTimes(1);
+    expect(configInstance.get('host')).toBe('initial-host'); // Should not have updated
+
+    // Act (Poll again with SAME bad config)
+    client
+      .intercept({
+        path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`,
+        method: 'GET',
+        headers: { 'if-none-match': 'bad-etag' },
+      })
+      .reply(StatusCodes.OK, badConfigData, { headers: { etag: 'bad-etag' } });
+
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE));
+
+    // Assert (Should NOT have called onChangeMock again)
+    expect(onChangeMock).toHaveBeenCalledTimes(1);
+  });
 });

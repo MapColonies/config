@@ -140,9 +140,9 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
         initOptions,
         async (newRemoteConfig: object) => {
           const newlyValidatedConfig = mergeAndValidate(newRemoteConfig);
+          await onChange!(newlyValidatedConfig);
           validatedConfig = newlyValidatedConfig;
           remoteConfig = newRemoteConfig;
-          await onChange!(newlyValidatedConfig);
         },
         currentEtag
       );
