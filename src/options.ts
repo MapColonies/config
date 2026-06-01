@@ -12,6 +12,10 @@ const defaultOptions: BaseOptions = {
   configServerUrl: 'http://localhost:8080',
   version: 'latest',
   pollIntervalMs: 30000,
+  offlineMode: false,
+  ignoreServerIsOlderVersionError: false,
+  localConfigPath: './config',
+  disableHotReload: false,
 };
 
 const envOptions: Partial<Record<keyof BaseOptions, string>> = {
@@ -21,6 +25,7 @@ const envOptions: Partial<Record<keyof BaseOptions, string>> = {
   offlineMode: process.env.CONFIG_OFFLINE_MODE,
   ignoreServerIsOlderVersionError: process.env.CONFIG_IGNORE_SERVER_IS_OLDER_VERSION_ERROR,
   pollIntervalMs: process.env.CONFIG_POLL_INTERVAL_MS,
+  disableHotReload: process.env.CONFIG_DISABLE_HOT_RELOAD,
 };
 
 // in order to merge correctly the keys should not exist, undefined is not enough

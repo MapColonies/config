@@ -40,6 +40,7 @@ describe('config', () => {
         schema: commonDbPartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
+        onChange: async () => {},
       });
 
       const conf = configInstance.getAll();
@@ -125,6 +126,7 @@ describe('config', () => {
         schema: commonDbPartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
+        onChange: async () => {},
       });
 
       const conf = configInstance.getAll();
@@ -185,6 +187,7 @@ describe('config', () => {
         schema: commonDbPartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
+        onChange: async () => {},
       });
 
       const parts = configInstance.getConfigParts();
@@ -222,6 +225,8 @@ describe('config', () => {
         localConfigPath: './tests/config',
         offlineMode: true,
         pollIntervalMs: 3000,
+        disableHotReload: false,
+        ignoreServerIsOlderVersionError: false,
       });
     });
 
@@ -249,6 +254,7 @@ describe('config', () => {
         schema: commonS3PartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
+        onChange: async () => {},
       });
 
       await expect(promise).rejects.toThrow('The schema version of the remote config does not match the schema version of the local config');
@@ -280,6 +286,7 @@ describe('config', () => {
         schema: commonDbPartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
+        onChange: async () => {},
       });
 
       await expect(promise).rejects.toThrow('Config validation error');
@@ -378,6 +385,7 @@ describe('config', () => {
         schema: commonDbPartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
+        onChange: async () => {},
       });
 
       await expect(promise).rejects.toThrow('The server version does not satisfy the required version.');
