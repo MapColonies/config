@@ -164,7 +164,7 @@ The package supports merging configurations from multiple sources (local, remote
 
 1. The remote configuration is fetched from the server specified by the `configServerUrl` option.
 2. If the `version` is set to `'latest'`, the latest version of the configuration is fetched. Otherwise, the specified version is fetched.
-3. **Continuous Polling:** If an `onChange` callback is provided, the SDK continuously polls the server using HTTP ETags (`If-None-Match`). When a `200 OK` is received (indicating a change), the configuration is automatically re-merged, validated, and the callback is triggered. `304 Not Modified` responses are silently ignored.
+3. **Continuous Polling:** If an `onChange` callback is provided, the SDK continuously polls the server using HTTP ETags (`If-None-Match`). When a `200 OK` is received (indicating a change), the configuration is automatically re-merged, validated, and the callback is triggered. `304 Not Modified` responses are silently ignored. To prevent cluster-wide traffic spikes (thundering herd), a **randomized jitter of +/- 15%** is automatically applied to each polling cycle.
 
 ### Environment Variables
 
