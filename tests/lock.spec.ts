@@ -61,6 +61,7 @@ describe('Distributed Semaphore Locking', () => {
       pollIntervalMs: DEFAULT_POLL_INTERVAL,
       onChange: onChangeMock,
       rolloutKey: 'my-lock',
+      callerId: 'my-caller',
     });
 
     // Arrange (Hot-reload triggers)
@@ -76,17 +77,19 @@ describe('Distributed Semaphore Locking', () => {
       .intercept({
         path: '/locks',
         method: 'POST',
-        body: JSON.stringify({ rolloutKey: 'my-lock', rolloutLimit: 1, lockTtlSeconds: 20 }),
+        body: JSON.stringify({ key: 'my-lock', callerId: 'my-caller', limit: 1, ttl: 20 }),
       })
       .reply(StatusCodes.CREATED);
+
     // Mock Lock Release
-    client.intercept({ path: '/locks/my-lock', method: 'DELETE' }).reply(StatusCodes.NO_CONTENT);
+    client.intercept({ path: '/locks/my-lock/my-caller', method: 'DELETE' }).reply(StatusCodes.NO_CONTENT);
 
     // Act (Wait for Poll)
     await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE));
+    await vi.waitFor(() => expect(onChangeMock).toHaveBeenCalledTimes(1));
 
     // Assert
-    expect(onChangeMock).toHaveBeenCalledTimes(1);
+    expect(onChangeMock).toHaveBeenCalledWith(expect.objectContaining({ host: 'updated-host' }));
   });
 
   it('should bypass lock during initial cold-start', async () => {
@@ -119,5 +122,71 @@ describe('Distributed Semaphore Locking', () => {
 
     // Assert
     expect(configInstance.get('host')).toBe('initial-host');
+  });
+
+  it('should wait and retry if lock acquisition returns 423 Locked with Retry-After', async () => {
+    // Arrange
+    const initialConfigData = {
+      configName: 'name',
+      schemaId: commonDbPartialV1.$id,
+      version: 1,
+      config: { host: 'initial-host' },
+      createdAt: 0,
+    };
+    const newConfigData = {
+      configName: 'name',
+      schemaId: commonDbPartialV1.$id,
+      version: 1,
+      config: { host: 'updated-host' },
+      createdAt: 1,
+    };
+
+    client
+      .intercept({ path: '/capabilities', method: 'GET' })
+      .reply(StatusCodes.OK, { serverVersion: '2.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
+    client
+      .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
+      .reply(StatusCodes.OK, initialConfigData, { headers: { etag: 'etag-1' } });
+
+    const onChangeMock = vi.fn();
+
+    await config({
+      configName: 'name',
+      version: 1,
+      schema: commonDbPartialV1,
+      configServerUrl: URL,
+      localConfigPath: './tests/config',
+      pollIntervalMs: DEFAULT_POLL_INTERVAL,
+      onChange: onChangeMock,
+      rolloutKey: 'my-lock',
+      callerId: 'my-caller',
+    });
+
+    // Arrange (Hot-reload)
+    client
+      .intercept({
+        path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`,
+        method: 'GET',
+      })
+      .reply(StatusCodes.OK, newConfigData, { headers: { etag: 'etag-2' } });
+
+    // Mock first lock attempt failing with 423
+    client.intercept({ path: '/locks', method: 'POST' }).reply(StatusCodes.LOCKED, {}, { headers: { 'retry-after': '2' } });
+
+    // Mock second lock attempt succeeding
+    client.intercept({ path: '/locks', method: 'POST' }).reply(StatusCodes.CREATED);
+
+    client.intercept({ path: '/locks/my-lock/my-caller', method: 'DELETE' }).reply(StatusCodes.NO_CONTENT);
+
+    // Act (Wait for Poll)
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE));
+
+    // Wait for the retry interval (2 seconds)
+    await vi.advanceTimersByTimeAsync(2001);
+
+    await vi.waitFor(() => expect(onChangeMock).toHaveBeenCalledTimes(1));
+
+    // Assert
+    expect(onChangeMock).toHaveBeenCalledWith(expect.objectContaining({ host: 'updated-host' }));
   });
 });

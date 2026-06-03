@@ -79,7 +79,6 @@ export interface BaseOptions {
   disableHotReload: boolean;
   /**
    * The key used for the distributed lock.
-   * @default os.hostname()
    */
   rolloutKey: string;
   /**
@@ -92,6 +91,11 @@ export interface BaseOptions {
    * @default 20
    */
   lockTtlSeconds: number;
+  /**
+   * The ID of the caller requesting the lock.
+   * @default os.hostname()
+   */
+  callerId: string;
 }
 
 /**
@@ -134,6 +138,7 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
     pollIntervalMs: { type: 'integer', default: 30000 },
     disableHotReload: { type: 'boolean', default: false },
     rolloutKey: { type: 'string' },
+    callerId: { type: 'string' },
     rolloutLimit: { type: 'integer', minimum: 1, default: 1 },
     lockTtlSeconds: { type: 'integer', minimum: 1, default: 20 },
   },

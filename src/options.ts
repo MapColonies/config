@@ -17,9 +17,10 @@ const defaultOptions: BaseOptions = {
   ignoreServerIsOlderVersionError: false,
   localConfigPath: './config',
   disableHotReload: false,
-  rolloutKey: hostname(),
+  rolloutKey: PACKAGE_NAME,
   rolloutLimit: 1,
   lockTtlSeconds: 20,
+  callerId: hostname(),
 };
 
 const envOptions: Partial<Record<keyof BaseOptions, string>> = {
@@ -33,6 +34,7 @@ const envOptions: Partial<Record<keyof BaseOptions, string>> = {
   rolloutKey: process.env.CONFIG_ROLLOUT_KEY,
   rolloutLimit: process.env.CONFIG_ROLLOUT_LIMIT,
   lockTtlSeconds: process.env.CONFIG_LOCK_TTL_SECONDS,
+  callerId: process.env.CONFIG_CALLER_ID,
 };
 
 // in order to merge correctly the keys should not exist, undefined is not enough

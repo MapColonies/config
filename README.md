@@ -160,6 +160,10 @@ The following environment variables can be used to configure the options:
 - `CONFIG_IGNORE_SERVER_IS_OLDER_VERSION_ERROR`: Sets the `ignoreServerIsOlderVersionError` option.
 - `CONFIG_POLL_INTERVAL_MS`: Sets the `pollIntervalMs` option.
 - `CONFIG_DISABLE_HOT_RELOAD`: Sets the `disableHotReload` option.
+- `CONFIG_ROLLOUT_KEY`: Sets the `rolloutKey` option.
+- `CONFIG_CALLER_ID`: Sets the `callerId` option.
+- `CONFIG_ROLLOUT_LIMIT`: Sets the `rolloutLimit` option.
+- `CONFIG_LOCK_TTL_SECONDS`: Sets the `lockTtlSeconds` option.
 
 ## Configuration Merging and Validation
 

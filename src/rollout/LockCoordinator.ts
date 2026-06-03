@@ -16,7 +16,12 @@ export class LockCoordinator {
   public async acquire(): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while (true) {
-      const { acquired, retryAfter } = await acquireLock(this.options.rolloutKey, this.options.rolloutLimit, this.options.lockTtlSeconds);
+      const { acquired, retryAfter } = await acquireLock(
+        this.options.rolloutKey,
+        this.options.callerId,
+        this.options.rolloutLimit,
+        this.options.lockTtlSeconds
+      );
 
       if (acquired) {
         return;
@@ -34,6 +39,6 @@ export class LockCoordinator {
    * Releases the distributed lock.
    */
   public async release(): Promise<void> {
-    await releaseLock(this.options.rolloutKey);
+    await releaseLock(this.options.rolloutKey, this.options.callerId);
   }
 }

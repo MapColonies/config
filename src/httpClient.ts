@@ -77,18 +77,14 @@ export async function getServerCapabilities(): Promise<ServerCapabilities> {
   return (await body.json()) as ServerCapabilities;
 }
 
-export async function acquireLock(
-  rolloutKey: string,
-  rolloutLimit: number,
-  lockTtlSeconds: number
-): Promise<{ acquired: boolean; retryAfter?: number }> {
-  debug('Acquiring lock for key %s with limit %d and ttl %d', rolloutKey, rolloutLimit, lockTtlSeconds);
+export async function acquireLock(key: string, callerId: string, limit: number, ttl: number): Promise<{ acquired: boolean; retryAfter?: number }> {
+  debug('Acquiring lock for key %s (caller: %s) with limit %d and ttl %d', key, callerId, limit, ttl);
   const { configServerUrl } = getOptions();
   const url = `${configServerUrl}/locks`;
 
   const res = await request(url, {
     method: 'POST',
-    body: JSON.stringify({ rolloutKey, rolloutLimit, lockTtlSeconds }),
+    body: JSON.stringify({ key, callerId, limit, ttl }),
     headers: { 'Content-Type': 'application/json' },
   });
 
@@ -113,10 +109,10 @@ export async function acquireLock(
   return { acquired: false };
 }
 
-export async function releaseLock(rolloutKey: string): Promise<void> {
-  debug('Releasing lock for key %s', rolloutKey);
+export async function releaseLock(key: string, callerId: string): Promise<void> {
+  debug('Releasing lock for key %s (caller: %s)', key, callerId);
   const { configServerUrl } = getOptions();
-  const url = `${configServerUrl}/locks/${rolloutKey}`;
+  const url = `${configServerUrl}/locks/${key}/${callerId}`;
 
   const res = await request(url, { method: 'DELETE' });
 
