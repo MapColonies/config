@@ -16,6 +16,7 @@ import { createConfigError } from './errors';
 import { initializeMetrics as initializeMetricsInternal } from './metrics';
 import { deepFreeze } from './utils/helpers';
 import { ChangeDetector } from './rollout/ChangeDetector';
+import { LockCoordinator } from './rollout/LockCoordinator';
 
 const debug = createDebug('config');
 
@@ -135,9 +136,11 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
 
     // Setup polling
     if (!disableHotReload) {
+      const lockCoordinator = new LockCoordinator(initOptions);
       changeDetector = new ChangeDetector(
         baseSchema.$id,
         initOptions,
+        lockCoordinator,
         async (newRemoteConfig: object) => {
           const newlyValidatedConfig = mergeAndValidate(newRemoteConfig);
           validatedConfig = newlyValidatedConfig;

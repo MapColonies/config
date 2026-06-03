@@ -77,6 +77,21 @@ export interface BaseOptions {
    * @default false
    */
   disableHotReload: boolean;
+  /**
+   * The key used for the distributed lock.
+   * @default os.hostname()
+   */
+  rolloutKey: string;
+  /**
+   * The maximum number of concurrent rollouts allowed.
+   * @default 1
+   */
+  rolloutLimit: number;
+  /**
+   * The time-to-live for the lock in seconds.
+   * @default 20
+   */
+  lockTtlSeconds: number;
 }
 
 /**
@@ -118,6 +133,9 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
     localConfigPath: { type: 'string', default: './config' },
     pollIntervalMs: { type: 'integer', default: 30000 },
     disableHotReload: { type: 'boolean', default: false },
+    rolloutKey: { type: 'string' },
+    rolloutLimit: { type: 'integer', minimum: 1, default: 1 },
+    lockTtlSeconds: { type: 'integer', minimum: 1, default: 20 },
   },
 };
 

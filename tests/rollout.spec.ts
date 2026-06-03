@@ -74,11 +74,17 @@ describe('Continuous Polling (ChangeDetector)', () => {
       })
       .reply(StatusCodes.OK, newConfigData, { headers: { etag: 'etag-2' } });
 
+    // Mock Lock Acquisition and Release
+    client.intercept({ path: '/locks', method: 'POST' }).reply(StatusCodes.CREATED);
+    client.intercept({ path: /\/locks\/.*/, method: 'DELETE' }).reply(StatusCodes.NO_CONTENT);
+
     // Act (Wait for Poll)
     await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE));
 
+    // Use waitFor to allow async promises to resolve without running future timers
+    await vi.waitFor(() => expect(onChangeMock).toHaveBeenCalledTimes(1));
+
     // Assert (Updated State)
-    expect(onChangeMock).toHaveBeenCalledTimes(1);
     expect(onChangeMock).toHaveBeenCalledWith(expect.objectContaining({ host: 'updated-host' }));
   });
 

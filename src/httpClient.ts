@@ -76,3 +76,59 @@ export async function getServerCapabilities(): Promise<ServerCapabilities> {
   debug('Server capabilities fetched successfully');
   return (await body.json()) as ServerCapabilities;
 }
+
+export async function acquireLock(
+  rolloutKey: string,
+  rolloutLimit: number,
+  lockTtlSeconds: number
+): Promise<{ acquired: boolean; retryAfter?: number }> {
+  debug('Acquiring lock for key %s with limit %d and ttl %d', rolloutKey, rolloutLimit, lockTtlSeconds);
+  const { configServerUrl } = getOptions();
+  const url = `${configServerUrl}/locks`;
+
+  const res = await request(url, {
+    method: 'POST',
+    body: JSON.stringify({ rolloutKey, rolloutLimit, lockTtlSeconds }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  if (res.statusCode === statusCodes.CREATED) {
+    debug('Lock acquired successfully');
+    return { acquired: true };
+  }
+
+  if (res.statusCode === statusCodes.LOCKED) {
+    const retryAfterHeader = res.headers['retry-after'];
+    const retryAfter = retryAfterHeader !== undefined ? parseInt(retryAfterHeader as string, 10) : undefined;
+    debug('Lock is already held. Retry-after: %d', retryAfter);
+    return { acquired: false, retryAfter };
+  }
+
+  if (res.statusCode > statusCodes.NOT_FOUND) {
+    debug('Failed to acquire lock. Status code: %d', res.statusCode);
+    throw createConfigError('httpResponseError', 'Failed to acquire lock', await createHttpErrorPayload(res));
+  }
+
+  debug('Unexpected status code while acquiring lock: %d', res.statusCode);
+  return { acquired: false };
+}
+
+export async function releaseLock(rolloutKey: string): Promise<void> {
+  debug('Releasing lock for key %s', rolloutKey);
+  const { configServerUrl } = getOptions();
+  const url = `${configServerUrl}/locks/${rolloutKey}`;
+
+  const res = await request(url, { method: 'DELETE' });
+
+  if (res.statusCode === statusCodes.NO_CONTENT || res.statusCode === statusCodes.NOT_FOUND) {
+    debug('Lock released successfully');
+    return;
+  }
+
+  if (res.statusCode > statusCodes.NOT_FOUND) {
+    debug('Failed to release lock. Status code: %d', res.statusCode);
+    throw createConfigError('httpResponseError', 'Failed to release lock', await createHttpErrorPayload(res));
+  }
+
+  debug('Unexpected status code while releasing lock: %d', res.statusCode);
+}

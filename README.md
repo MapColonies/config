@@ -174,6 +174,11 @@ The package supports merging configurations from multiple sources (local, remote
 1. The remote configuration is fetched from the server specified by the `configServerUrl` option.
 2. If the `version` is set to `'latest'`, the latest version of the configuration is fetched. Otherwise, the specified version is fetched.
 3. **Continuous Polling:** If an `onChange` callback is provided, the SDK continuously polls the server using HTTP ETags (`If-None-Match`). When a `200 OK` is received (indicating a change), the configuration is automatically re-merged, validated, and the callback is triggered. `304 Not Modified` responses are silently ignored. To prevent cluster-wide traffic spikes (thundering herd), a **randomized jitter of +/- 15%** is automatically applied to each polling cycle.
+4. **Distributed Semaphore Locking:** To control rollout concurrency across a cluster, the SDK implements a distributed locking mechanism.
+    - **Lock Acquisition:** Before triggering the `onChange` callback during a hot-reload, the SDK attempts to acquire a lock from the configuration server.
+    - **Lock Release:** The lock is automatically released after the `onChange` callback completes (whether it succeeds or throws).
+    - **423 Locked & Retry-After:** If the server returns `423 Locked`, it indicates the rollout limit has been reached. The SDK will respect the `Retry-After` header provided by the server, waiting for the specified duration before attempting to acquire the lock again.
+    - **Cold-Start Bypass:** Distributed locking is **only** active during hot-reloads. Initial configuration fetches during application startup (cold-start) always bypass the lock to ensure immediate availability.
 
 ### Environment Variables
 

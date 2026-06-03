@@ -1,3 +1,4 @@
+import { hostname } from 'node:os';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Interceptable, MockAgent, setGlobalDispatcher } from 'undici';
 import { commonDbPartialV1, commonS3PartialV1 } from '@map-colonies/schemas';
@@ -227,6 +228,9 @@ describe('config', () => {
         pollIntervalMs: 3000,
         disableHotReload: false,
         ignoreServerIsOlderVersionError: false,
+        lockTtlSeconds: 20,
+        rolloutKey: hostname(),
+        rolloutLimit: 1,
       });
     });
 

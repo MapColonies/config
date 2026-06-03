@@ -2,6 +2,7 @@ import { JITTER_PERCENTAGE } from '../constants';
 import { getRemoteConfig } from '../httpClient';
 import { BaseOptions } from '../types';
 import { createDebug } from '../utils/debug';
+import { LockCoordinator } from './LockCoordinator';
 
 const debug = createDebug('changeDetector');
 
@@ -16,6 +17,7 @@ export class ChangeDetector {
   public constructor(
     private readonly schemaId: string,
     private readonly options: BaseOptions,
+    private readonly lockCoordinator: LockCoordinator,
     private readonly onConfigUpdate: (newRemoteConfig: object) => void | Promise<void>,
     initialEtag: string
   ) {
@@ -69,7 +71,15 @@ export class ChangeDetector {
     }
 
     debug('Config change detected');
-    this.currentEtag = response.etag!;
-    await this.onConfigUpdate(response.config.config);
+    await this.lockCoordinator.acquire();
+    try {
+      await this.onConfigUpdate(response.config.config);
+      this.currentEtag = response.etag;
+    } catch (err) {
+      debug('Error during callback execution: %s', (err as Error).message);
+    }
+    finally {
+      await this.lockCoordinator.release();
+    }
   }
 }

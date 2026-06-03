@@ -1,3 +1,4 @@
+import { hostname } from 'os';
 import deepmerge from 'deepmerge';
 import { BaseOptions, optionsSchema } from './types';
 import { ajvOptionsValidator, validate } from './validator';
@@ -16,6 +17,9 @@ const defaultOptions: BaseOptions = {
   ignoreServerIsOlderVersionError: false,
   localConfigPath: './config',
   disableHotReload: false,
+  rolloutKey: hostname(),
+  rolloutLimit: 1,
+  lockTtlSeconds: 20,
 };
 
 const envOptions: Partial<Record<keyof BaseOptions, string>> = {
@@ -26,6 +30,9 @@ const envOptions: Partial<Record<keyof BaseOptions, string>> = {
   ignoreServerIsOlderVersionError: process.env.CONFIG_IGNORE_SERVER_IS_OLDER_VERSION_ERROR,
   pollIntervalMs: process.env.CONFIG_POLL_INTERVAL_MS,
   disableHotReload: process.env.CONFIG_DISABLE_HOT_RELOAD,
+  rolloutKey: process.env.CONFIG_ROLLOUT_KEY,
+  rolloutLimit: process.env.CONFIG_ROLLOUT_LIMIT,
+  lockTtlSeconds: process.env.CONFIG_LOCK_TTL_SECONDS,
 };
 
 // in order to merge correctly the keys should not exist, undefined is not enough
