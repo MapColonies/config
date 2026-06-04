@@ -96,7 +96,7 @@ export type ConfigOptions<T extends SchemaWithType> = Prettify<
     /**
      * The callback function that is triggered when the configuration changes.
      */
-    onChange?: (config: unknown) => void | Promise<void>;
+    onChange?: () => void | Promise<void>;
   }
 >;
 

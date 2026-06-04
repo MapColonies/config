@@ -24,7 +24,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
     vi.restoreAllMocks();
   });
 
-  it('should trigger onChange when polling returns a new config (200 OK)', async () => {
+  it('should trigger onChange and exit when polling returns a new config (200 OK)', async () => {
     // Arrange
     const initialConfigData = {
       configName: 'name',
@@ -49,6 +49,9 @@ describe('Continuous Polling (ChangeDetector)', () => {
       .reply(StatusCodes.OK, initialConfigData, { headers: { etag: 'etag-1' } });
 
     const onChangeMock = vi.fn();
+    const exitMock = vi.spyOn(process, 'exit').mockImplementation(() => {
+      return undefined as never;
+    });
 
     // Act
     const configInstance = await config({
@@ -79,7 +82,119 @@ describe('Continuous Polling (ChangeDetector)', () => {
 
     // Assert (Updated State)
     expect(onChangeMock).toHaveBeenCalledTimes(1);
-    expect(onChangeMock).toHaveBeenCalledWith(expect.objectContaining({ host: 'updated-host' }));
+    expect(onChangeMock).toHaveBeenCalledWith();
+    expect(exitMock).toHaveBeenCalledWith(0);
+  });
+
+  it('should exit when polling returns a new config (200 OK) and onChange is not provided', async () => {
+    // Arrange
+    const initialConfigData = {
+      configName: 'name',
+      schemaId: commonDbPartialV1.$id,
+      version: 1,
+      config: { host: 'initial-host' },
+      createdAt: 0,
+    };
+    const newConfigData = {
+      configName: 'name',
+      schemaId: commonDbPartialV1.$id,
+      version: 1,
+      config: { host: 'updated-host' },
+      createdAt: 1,
+    };
+
+    client
+      .intercept({ path: '/capabilities', method: 'GET' })
+      .reply(StatusCodes.OK, { serverVersion: '2.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
+    client
+      .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
+      .reply(StatusCodes.OK, initialConfigData, { headers: { etag: 'etag-1' } });
+
+    const exitMock = vi.spyOn(process, 'exit').mockImplementation(() => {
+      return undefined as never;
+    });
+
+    // Act
+    await config({
+      configName: 'name',
+      version: 1,
+      schema: commonDbPartialV1,
+      configServerUrl: URL,
+      localConfigPath: './tests/config',
+      pollIntervalMs: DEFAULT_POLL_INTERVAL,
+    });
+
+    // Arrange (Next Poll)
+    client
+      .intercept({
+        path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`,
+        method: 'GET',
+        headers: { 'if-none-match': 'etag-1' },
+      })
+      .reply(StatusCodes.OK, newConfigData, { headers: { etag: 'etag-2' } });
+
+    // Act (Wait for Poll)
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL);
+
+    // Assert
+    expect(exitMock).toHaveBeenCalledWith(0);
+  });
+
+  it('should exit even if onChange throws an error', async () => {
+    // Arrange
+    const initialConfigData = {
+      configName: 'name',
+      schemaId: commonDbPartialV1.$id,
+      version: 1,
+      config: { host: 'initial-host' },
+      createdAt: 0,
+    };
+    const newConfigData = {
+      configName: 'name',
+      schemaId: commonDbPartialV1.$id,
+      version: 1,
+      config: { host: 'updated-host' },
+      createdAt: 1,
+    };
+
+    client
+      .intercept({ path: '/capabilities', method: 'GET' })
+      .reply(StatusCodes.OK, { serverVersion: '2.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
+    client
+      .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
+      .reply(StatusCodes.OK, initialConfigData, { headers: { etag: 'etag-1' } });
+
+    const onChangeMock = vi.fn().mockRejectedValue(new Error('onChange error'));
+    const exitMock = vi.spyOn(process, 'exit').mockImplementation(() => {
+      return undefined as never;
+    });
+
+    // Act
+    await config({
+      configName: 'name',
+      version: 1,
+      schema: commonDbPartialV1,
+      configServerUrl: URL,
+      localConfigPath: './tests/config',
+      pollIntervalMs: DEFAULT_POLL_INTERVAL,
+      onChange: onChangeMock,
+    });
+
+    // Arrange (Next Poll)
+    client
+      .intercept({
+        path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`,
+        method: 'GET',
+        headers: { 'if-none-match': 'etag-1' },
+      })
+      .reply(StatusCodes.OK, newConfigData, { headers: { etag: 'etag-2' } });
+
+    // Act (Wait for Poll)
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL);
+
+    // Assert
+    expect(onChangeMock).toHaveBeenCalledTimes(1);
+    expect(exitMock).toHaveBeenCalledWith(0);
   });
 
   it('should not trigger onChange when polling returns 304 Not Modified', async () => {

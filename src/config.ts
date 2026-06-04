@@ -26,7 +26,7 @@ const semverSatisfies = '2.x';
 /**
  * Retrieves the configuration based on the provided options.
  *
- * If `onChange` is provided in the options and `offlineMode` is not enabled, the SDK starts a background
+ * If `offlineMode` is not enabled, the SDK starts a background
  * polling mechanism. The returned `ConfigInstance` serves as a live state machine; its `get` and `getAll`
  * methods will return the most recent configuration retrieved from the server during hot-reloads.
  *
@@ -78,11 +78,6 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
 
   // Handle Remote Config and Polling
   if (!offlineMode) {
-    if (!disableHotReload && onChange === undefined) {
-      debug('Hot reload is enabled but no onChange callback was provided');
-      throw createConfigError('onChangeCallbackMissingError', `Hot reload is enabled but no 'onChange' callback was provided`, {});
-    }
-
     debug('handling fetching remote data');
     // check if the server is using an older version of the schemas package
     const capabilitiesResponse = await getServerCapabilities();
@@ -135,17 +130,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
 
     // Setup polling
     if (!disableHotReload) {
-      changeDetector = new ChangeDetector(
-        baseSchema.$id,
-        initOptions,
-        async (newRemoteConfig: object) => {
-          const newlyValidatedConfig = mergeAndValidate(newRemoteConfig);
-          validatedConfig = newlyValidatedConfig;
-          remoteConfig = newRemoteConfig;
-          await onChange!(newlyValidatedConfig);
-        },
-        currentEtag
-      );
+      changeDetector = new ChangeDetector(baseSchema.$id, initOptions, currentEtag, onChange);
       changeDetector.start();
     }
   } else {
