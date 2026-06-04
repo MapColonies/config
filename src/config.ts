@@ -27,8 +27,9 @@ const semverSatisfies = '2.x';
  * Retrieves the configuration based on the provided options.
  *
  * If `offlineMode` is not enabled, the SDK starts a background
- * polling mechanism. The returned `ConfigInstance` serves as a live state machine; its `get` and `getAll`
- * methods will return the most recent configuration retrieved from the server during hot-reloads.
+ * polling mechanism. When a configuration change is detected, the SDK
+ * will execute the `onChange` callback (if provided) and then forcefully
+ * terminate the process (`process.exit(0)`), allowing Kubernetes to restart the pod.
  *
  * @template T - The type of the configuration schema.
  * @param {ConfigOptions<T>} options - The options for retrieving the configuration.
