@@ -9,14 +9,14 @@ const debug = createDebug('changeDetector');
  * If a change is detected, it invokes the provided callback with the new configuration.
  */
 export class ChangeDetector {
-  private currentEtag: string;
+  private readonly currentEtag: string;
   private timer?: NodeJS.Timeout;
 
   public constructor(
     private readonly schemaId: string,
     private readonly options: BaseOptions,
-    private readonly onConfigUpdate: (newRemoteConfig: object) => void | Promise<void>,
-    initialEtag: string
+    initialEtag: string,
+    private readonly onConfigUpdate?: () => void | Promise<void>
   ) {
     this.currentEtag = initialEtag;
   }
@@ -50,7 +50,14 @@ export class ChangeDetector {
     }
 
     debug('Config change detected');
-    this.currentEtag = response.etag!;
-    await this.onConfigUpdate(response.config.config);
+    try {
+      if (this.onConfigUpdate) {
+        await this.onConfigUpdate();
+      }
+    } catch (err) {
+      debug('Error during onChange callback: %s', (err as Error).message);
+    } finally {
+      process.exit(0);
+    }
   }
 }
