@@ -11,7 +11,7 @@ const debug = createDebug('changeDetector');
  * If a change is detected, it invokes the provided callback with the new configuration.
  */
 export class ChangeDetector {
-  private currentEtag: string;
+  private readonly currentEtag: string;
   private timer?: NodeJS.Timeout;
 
   public constructor(
@@ -71,15 +71,23 @@ export class ChangeDetector {
     }
 
     debug('Config change detected');
-    await this.lockCoordinator.acquire();
     try {
-      await this.onConfigUpdate(response.config.config);
-      this.currentEtag = response.etag;
+      await this.lockCoordinator.acquire();
+      try {
+        await this.onConfigUpdate(response.config.config);
+      } catch (err) {
+        debug('Error during onChange callback: %s', (err as Error).message);
+      } finally {
+        try {
+          await this.lockCoordinator.release();
+        } catch (releaseErr) {
+          debug('Best-effort lock release failed: %s', (releaseErr as Error).message);
+        }
+        debug('Hard termination triggered. Exiting process.');
+        process.exit(0);
+      }
     } catch (err) {
-      debug('Error during callback execution: %s', (err as Error).message);
-    }
-    finally {
-      await this.lockCoordinator.release();
+      debug('Error during lock acquisition: %s', (err as Error).message);
     }
   }
 }

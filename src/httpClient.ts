@@ -114,17 +114,16 @@ export async function releaseLock(key: string, callerId: string): Promise<void> 
   const { configServerUrl } = getOptions();
   const url = `${configServerUrl}/locks/${key}/${callerId}`;
 
-  const res = await request(url, { method: 'DELETE' });
+  try {
+    const res = await request(url, { method: 'DELETE' });
 
-  if (res.statusCode === statusCodes.NO_CONTENT || res.statusCode === statusCodes.NOT_FOUND) {
-    debug('Lock released successfully');
-    return;
+    if (res.statusCode === statusCodes.NO_CONTENT || res.statusCode === statusCodes.NOT_FOUND) {
+      debug('Lock released successfully');
+      return;
+    }
+
+    debug('Unexpected status code while releasing lock: %d', res.statusCode);
+  } catch (error) {
+    debug('Error during best-effort lock release (swallowed): %s', (error as Error).message);
   }
-
-  if (res.statusCode > statusCodes.NOT_FOUND) {
-    debug('Failed to release lock. Status code: %d', res.statusCode);
-    throw createConfigError('httpResponseError', 'Failed to release lock', await createHttpErrorPayload(res));
-  }
-
-  debug('Unexpected status code while releasing lock: %d', res.statusCode);
 }

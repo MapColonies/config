@@ -78,9 +78,14 @@ export interface BaseOptions {
    */
   disableHotReload: boolean;
   /**
-   * The key used for the distributed lock.
+   * The key used for the distributed lock (opaque identifier for the resource).
    */
   rolloutKey: string;
+  /**
+   * The unique ID of the instance holding the lock.
+   * @default os.hostname()
+   */
+  callerId: string;
   /**
    * The maximum number of concurrent rollouts allowed.
    * @default 1
@@ -91,11 +96,6 @@ export interface BaseOptions {
    * @default 20
    */
   lockTtlSeconds: number;
-  /**
-   * The ID of the caller requesting the lock.
-   * @default os.hostname()
-   */
-  callerId: string;
 }
 
 /**

@@ -28,7 +28,8 @@ const configInstance = await config({
   pollIntervalMs: 30000,
   onChange: (updatedConfig) => {
     console.log('Configuration updated:', updatedConfig);
-    // Re-initialize DB connections, etc.
+    // Note: The SDK will forcefully terminate the process
+    // immediately after this callback completes to trigger a fresh restart.
   }
 });
 
@@ -144,6 +145,34 @@ This package allows you to configure various options for loading and managing co
 - **Description**: The polling interval in milliseconds for hot-reloading.
 - **Environment Variable**: `CONFIG_POLL_INTERVAL_MS`
 
+### `rolloutKey`
+- **Type**: `string`
+- **Optional**: `true`
+- **Default**: `PACKAGE_NAME`
+- **Description**: The key used for the distributed lock (opaque identifier for the resource).
+- **Environment Variable**: `CONFIG_ROLLOUT_KEY`
+
+### `callerId`
+- **Type**: `string`
+- **Optional**: `true`
+- **Default**: `os.hostname()`
+- **Description**: The unique ID of the instance holding the lock.
+- **Environment Variable**: `CONFIG_CALLER_ID`
+
+### `rolloutLimit`
+- **Type**: `number`
+- **Optional**: `true`
+- **Default**: `1`
+- **Description**: The maximum number of concurrent rollouts allowed.
+- **Environment Variable**: `CONFIG_ROLLOUT_LIMIT`
+
+### `lockTtlSeconds`
+- **Type**: `number`
+- **Optional**: `true`
+- **Default**: `20`
+- **Description**: The time-to-live for the lock in seconds.
+- **Environment Variable**: `CONFIG_LOCK_TTL_SECONDS`
+
 ### `onChange`
 - **Type**: `(config: T) => void | Promise<void>`
 - **Optional**: `true`
@@ -177,8 +206,9 @@ The package supports merging configurations from multiple sources (local, remote
 
 1. The remote configuration is fetched from the server specified by the `configServerUrl` option.
 2. If the `version` is set to `'latest'`, the latest version of the configuration is fetched. Otherwise, the specified version is fetched.
-3. **Continuous Polling:** If an `onChange` callback is provided, the SDK continuously polls the server using HTTP ETags (`If-None-Match`). When a `200 OK` is received (indicating a change), the configuration is automatically re-merged, validated, and the callback is triggered. `304 Not Modified` responses are silently ignored. To prevent cluster-wide traffic spikes (thundering herd), a **randomized jitter of +/- 15%** is automatically applied to each polling cycle.
-4. **Distributed Semaphore Locking:** To control rollout concurrency across a cluster, the SDK implements a distributed locking mechanism.
+3. **Continuous Polling:** If an `onChange` callback is provided, the SDK continuously polls the server using HTTP ETags (`If-None-Match`). When a `200 OK` is received (indicating a change), the configuration is automatically re-merged and the callback is triggered. `304 Not Modified` responses are silently ignored. To prevent cluster-wide traffic spikes (thundering herd), a **randomized jitter of +/- 15%** is automatically applied to each polling cycle.
+4. **Hard Termination Lifecycle:** The SDK follows a "Stupid Client" philosophy. Upon a successful configuration fetch and lock acquisition, it executes the `onChange` callback. Regardless of whether the callback succeeds or fails, the SDK will gracefully release the lock and then **immediately terminate the process (`process.exit(0)`)**. This delegates state reconciliation and service recovery to the container orchestrator (e.g., Kubernetes).
+5. **Distributed Semaphore Locking:** To control rollout concurrency across a cluster, the SDK implements a distributed locking mechanism using four parameters: `key` (opaque identifier), `callerId` (instance ID), `ttl` (lock duration), and `limit` (max concurrent locks).
     - **Lock Acquisition:** Before triggering the `onChange` callback during a hot-reload, the SDK attempts to acquire a lock from the configuration server.
     - **Lock Release:** The lock is automatically released after the `onChange` callback completes (whether it succeeds or throws).
     - **423 Locked & Retry-After:** If the server returns `423 Locked`, it indicates the rollout limit has been reached. The SDK will respect the `Retry-After` header provided by the server, waiting for the specified duration before attempting to acquire the lock again.

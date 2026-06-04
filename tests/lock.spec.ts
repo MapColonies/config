@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, MockInstance, vi } from 'vitest';
 import { Interceptable, MockAgent, setGlobalDispatcher } from 'undici';
 import { commonDbPartialV1 } from '@map-colonies/schemas';
 import { StatusCodes } from 'http-status-codes';
@@ -10,9 +10,12 @@ const DEFAULT_POLL_INTERVAL = 10000;
 
 describe('Distributed Semaphore Locking', () => {
   let client: Interceptable;
+  let exitSpy: MockInstance<typeof process.exit>;
+  const instances: { stop: () => void }[] = [];
 
   beforeEach(() => {
     vi.useFakeTimers();
+    exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const agent = new MockAgent();
     agent.disableNetConnect();
 
@@ -21,7 +24,10 @@ describe('Distributed Semaphore Locking', () => {
   });
 
   afterEach(() => {
+    instances.forEach((instance) => instance.stop());
+    instances.length = 0;
     vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should acquire lock before onChange and release it after (during hot-reload)', async () => {
@@ -52,7 +58,7 @@ describe('Distributed Semaphore Locking', () => {
     const onChangeMock = vi.fn();
 
     // Act
-    await config({
+    const configInstance = await config({
       configName: 'name',
       version: 1,
       schema: commonDbPartialV1,
@@ -63,6 +69,7 @@ describe('Distributed Semaphore Locking', () => {
       rolloutKey: 'my-lock',
       callerId: 'my-caller',
     });
+    instances.push(configInstance);
 
     // Arrange (Hot-reload triggers)
     client
@@ -72,6 +79,7 @@ describe('Distributed Semaphore Locking', () => {
         headers: { 'if-none-match': 'etag-1' },
       })
       .reply(StatusCodes.OK, newConfigData, { headers: { etag: 'etag-2' } });
+
     // Mock Lock Acquisition
     client
       .intercept({
@@ -86,7 +94,7 @@ describe('Distributed Semaphore Locking', () => {
 
     // Act (Wait for Poll)
     await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE));
-    await vi.waitFor(() => expect(onChangeMock).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(exitSpy).toHaveBeenCalledWith(0));
 
     // Assert
     expect(onChangeMock).toHaveBeenCalledWith(expect.objectContaining({ host: 'updated-host' }));
@@ -119,9 +127,10 @@ describe('Distributed Semaphore Locking', () => {
       pollIntervalMs: DEFAULT_POLL_INTERVAL,
       onChange: vi.fn(),
     });
-
+    instances.push(configInstance);
     // Assert
     expect(configInstance.get('host')).toBe('initial-host');
+    expect(exitSpy).not.toHaveBeenCalled();
   });
 
   it('should wait and retry if lock acquisition returns 423 Locked with Retry-After', async () => {
@@ -150,7 +159,7 @@ describe('Distributed Semaphore Locking', () => {
 
     const onChangeMock = vi.fn();
 
-    await config({
+    const configInstance = await config({
       configName: 'name',
       version: 1,
       schema: commonDbPartialV1,
@@ -161,6 +170,7 @@ describe('Distributed Semaphore Locking', () => {
       rolloutKey: 'my-lock',
       callerId: 'my-caller',
     });
+    instances.push(configInstance);
 
     // Arrange (Hot-reload)
     client
@@ -184,7 +194,7 @@ describe('Distributed Semaphore Locking', () => {
     // Wait for the retry interval (2 seconds)
     await vi.advanceTimersByTimeAsync(2001);
 
-    await vi.waitFor(() => expect(onChangeMock).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(exitSpy).toHaveBeenCalledWith(0));
 
     // Assert
     expect(onChangeMock).toHaveBeenCalledWith(expect.objectContaining({ host: 'updated-host' }));

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, MockInstance, vi } from 'vitest';
 import { Interceptable, MockAgent, setGlobalDispatcher } from 'undici';
 import { commonDbPartialV1 } from '@map-colonies/schemas';
 import { StatusCodes } from 'http-status-codes';
@@ -10,9 +10,12 @@ const DEFAULT_POLL_INTERVAL = 10000;
 
 describe('Continuous Polling (ChangeDetector)', () => {
   let client: Interceptable;
+  let exitSpy: MockInstance<typeof process.exit>;
+  const instances: { stop: () => void }[] = [];
 
   beforeEach(() => {
     vi.useFakeTimers();
+    exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const agent = new MockAgent();
     agent.disableNetConnect();
 
@@ -21,10 +24,13 @@ describe('Continuous Polling (ChangeDetector)', () => {
   });
 
   afterEach(() => {
+    instances.forEach((instance) => instance.stop());
+    instances.length = 0;
     vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
-  it('should trigger onChange when polling returns a new config (200 OK)', async () => {
+  it('should trigger onChange and exit process when polling returns a new config (200 OK)', async () => {
     // Arrange
     const initialConfigData = {
       configName: 'name',
@@ -60,6 +66,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
       pollIntervalMs: DEFAULT_POLL_INTERVAL,
       onChange: onChangeMock,
     });
+    instances.push(configInstance);
 
     // Assert (Initial State)
     expect(configInstance.get('host')).toBe('initial-host');
@@ -81,14 +88,15 @@ describe('Continuous Polling (ChangeDetector)', () => {
     // Act (Wait for Poll)
     await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE));
 
-    // Use waitFor to allow async promises to resolve without running future timers
+    // Use waitFor to allow async promises to resolve
     await vi.waitFor(() => expect(onChangeMock).toHaveBeenCalledTimes(1));
 
-    // Assert (Updated State)
+    // Assert (Updated State & Hard Termination)
     expect(onChangeMock).toHaveBeenCalledWith(expect.objectContaining({ host: 'updated-host' }));
+    expect(exitSpy).toHaveBeenCalledWith(0);
   });
 
-  it('should not trigger onChange when polling returns 304 Not Modified', async () => {
+  it('should not trigger onChange or exit when polling returns 304 Not Modified', async () => {
     // Arrange
     const initialConfigData = {
       configName: 'name',
@@ -117,6 +125,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
       pollIntervalMs: DEFAULT_POLL_INTERVAL,
       onChange: onChangeMock,
     });
+    instances.push(configInstance);
 
     // Arrange (Setup 304 response)
     client
@@ -132,6 +141,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
 
     // Assert
     expect(onChangeMock).not.toHaveBeenCalled();
+    expect(exitSpy).not.toHaveBeenCalled();
     expect(configInstance.get('host')).toBe('initial-host');
   });
 
@@ -163,6 +173,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
       pollIntervalMs: DEFAULT_POLL_INTERVAL,
       onChange: onChangeMock,
     });
+    instances.push(configInstance);
 
     // Act
     configInstance.stop();
@@ -172,6 +183,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
 
     // Assert
     expect(onChangeMock).not.toHaveBeenCalled();
+    expect(exitSpy).not.toHaveBeenCalled();
   });
 
   it('should apply randomized jitter within boundaries over 10 cycles', async () => {
@@ -203,7 +215,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
     const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
 
     // Act
-    await config({
+    const configInstance = await config({
       configName: 'name',
       version: 1,
       schema: commonDbPartialV1,
@@ -212,6 +224,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
       pollIntervalMs: DEFAULT_POLL_INTERVAL,
       onChange: vi.fn(),
     });
+    instances.push(configInstance);
 
     const maxJitter = DEFAULT_POLL_INTERVAL * JITTER_PERCENTAGE;
     const minWait = DEFAULT_POLL_INTERVAL - maxJitter;
@@ -255,7 +268,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
     const onChangeMock = vi.fn();
 
     // Act
-    await config({
+    const configInstance = await config({
       configName: 'name',
       version: 1,
       schema: commonDbPartialV1,
@@ -265,11 +278,76 @@ describe('Continuous Polling (ChangeDetector)', () => {
       onChange: onChangeMock,
       disableHotReload: true,
     });
+    instances.push(configInstance);
 
     // Advance time beyond the polling interval
     await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE) + 1);
 
     // Assert
     expect(onChangeMock).not.toHaveBeenCalled();
+    expect(exitSpy).not.toHaveBeenCalled();
+  });
+
+  it('should exit with 0 even if onChange throws an error', async () => {
+    // Arrange
+    const initialConfigData = {
+      configName: 'name',
+      schemaId: commonDbPartialV1.$id,
+      version: 1,
+      config: { host: 'initial-host' },
+      createdAt: 0,
+    };
+    const badConfigData = {
+      configName: 'name',
+      schemaId: commonDbPartialV1.$id,
+      version: 1,
+      config: { host: 'bad-host' },
+      createdAt: 1,
+    };
+
+    client
+      .intercept({ path: '/capabilities', method: 'GET' })
+      .reply(StatusCodes.OK, { serverVersion: '2.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
+    client
+      .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
+      .reply(StatusCodes.OK, initialConfigData, { headers: { etag: 'initial-etag' } });
+
+    const onChangeMock = vi.fn().mockImplementation(() => {
+      throw new Error('Boom!');
+    });
+
+    // Act
+    const configInstance = await config({
+      configName: 'name',
+      version: 1,
+      schema: commonDbPartialV1,
+      configServerUrl: URL,
+      localConfigPath: './tests/config',
+      pollIntervalMs: DEFAULT_POLL_INTERVAL,
+      onChange: onChangeMock,
+    });
+    instances.push(configInstance);
+
+    // Act (Trigger poll with bad config)
+    client
+      .intercept({
+        path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`,
+        method: 'GET',
+        headers: { 'if-none-match': 'initial-etag' },
+      })
+      .reply(StatusCodes.OK, badConfigData, { headers: { etag: 'bad-etag' } });
+
+    // Mock Lock Acquisition and Release
+    client.intercept({ path: '/locks', method: 'POST' }).reply(StatusCodes.CREATED);
+    client.intercept({ path: /\/locks\/.*/, method: 'DELETE' }).reply(StatusCodes.NO_CONTENT);
+
+    // Act (Wait for Poll)
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE));
+
+    // Use waitFor to allow async promises to resolve
+    await vi.waitFor(() => expect(exitSpy).toHaveBeenCalledWith(0));
+
+    // Assert (Fails once but still exits)
+    expect(onChangeMock).toHaveBeenCalledTimes(1);
   });
 });
