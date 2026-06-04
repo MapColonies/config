@@ -26,7 +26,7 @@ const semverSatisfies = '2.x';
 /**
  * Retrieves the configuration based on the provided options.
  *
- * If `onChange` is provided in the options and `offlineMode` is not enabled, the SDK starts a background
+ * If `offlineMode` is not enabled, the SDK starts a background
  * polling mechanism. The returned `ConfigInstance` serves as a live state machine; its `get` and `getAll`
  * methods will return the most recent configuration retrieved from the server during hot-reloads.
  *
@@ -129,20 +129,8 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
     validatedConfig = mergeAndValidate(remoteConfig);
 
     // Setup polling
-    if (onChange) {
-      changeDetector = new ChangeDetector(
-        baseSchema.$id,
-        initOptions,
-        async (newRemoteConfig: object) => {
-          const newlyValidatedConfig = mergeAndValidate(newRemoteConfig);
-          validatedConfig = newlyValidatedConfig;
-          remoteConfig = newRemoteConfig;
-          await onChange(newlyValidatedConfig);
-        },
-        currentEtag
-      );
-      changeDetector.start();
-    }
+    changeDetector = new ChangeDetector(baseSchema.$id, initOptions, currentEtag, onChange);
+    changeDetector.start();
   } else {
     // If offline, bypass remote and just merge local/env
     validatedConfig = mergeAndValidate({});

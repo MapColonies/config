@@ -26,9 +26,8 @@ const configInstance = await config({
   version: 'latest',
   offlineMode: false,
   pollIntervalMs: 30000,
-  onChange: (updatedConfig) => {
-    console.log('Configuration updated:', updatedConfig);
-    // Re-initialize DB connections, etc.
+  onChange: () => {
+    console.log('Configuration changed! The process will now restart...');
   }
 });
 
@@ -41,26 +40,26 @@ This section describes the API provided by the package for interacting with the 
 
 ### `ConfigInstance<T>`
 
-The `ConfigInstance` interface represents your way to interact with the configuration. When hot-reloading is enabled, this instance acts as a **live state machine**, updating its internal state dynamically.
-`T` is the typescript type associated with the chosen schema. it can be imported from the `@map-colonies/schemas` package.
+The `ConfigInstance` interface represents your way to interact with the configuration.
+`T` is the typescript type associated with the chosen schema. It can be imported from the `@map-colonies/schemas` package.
 
 #### Methods
 
 ##### `get<TPath extends string>(path: TPath): _.GetFieldType<T, TPath>`
 
-- **Description**: Retrieves the value at the specified path from the configuration object. If hot-reloading is active, this returns the value from the **most recent** configuration update.
+- **Description**: Retrieves the value at the specified path from the configuration object.
 - **Parameters**:
   - `path` (`TPath`): The path to the desired value.
 - **Returns**: The value at the specified path.
 
 ##### `getAll(): T`
 
-- **Description**: Retrieves the entire configuration object. If hot-reloading is active, this returns the **most recent** configuration state.
+- **Description**: Retrieves the entire configuration object.
 - **Returns**: The entire configuration object.
 
 ##### `getConfigParts(): { localConfig: object; config: object; envConfig: object }`
 
-- **Description**: Retrieves different parts of the configuration object before being merged and validated. If hot-reloading is active, the `config` part reflects the **latest remote payload**.
+- **Description**: Retrieves different parts of the configuration object before being merged and validated.
 - **Returns**: An object containing the `localConfig`, `config`, and `envConfig` parts of the configuration.
   - `localConfig`: The local configuration object.
   - `config`: The remote configuration object.
@@ -164,7 +163,7 @@ The package supports merging configurations from multiple sources (local, remote
 
 1. The remote configuration is fetched from the server specified by the `configServerUrl` option.
 2. If the `version` is set to `'latest'`, the latest version of the configuration is fetched. Otherwise, the specified version is fetched.
-3. **Continuous Polling:** If an `onChange` callback is provided, the SDK continuously polls the server using HTTP ETags (`If-None-Match`). When a `200 OK` is received (indicating a change), the configuration is automatically re-merged, validated, and the callback is triggered. `304 Not Modified` responses are silently ignored. To prevent cluster-wide traffic spikes (thundering herd), a **randomized jitter of +/- 15%** is automatically applied to each polling cycle.
+3. **Continuous Polling:** The SDK continuously polls the server using HTTP ETags (`If-None-Match`). When a `200 OK` is received (indicating a change), the `onChange` callback is triggered (if provided), and the process is then terminated to allow for a fresh start with the new configuration. `304 Not Modified` responses are silently ignored. To prevent cluster-wide traffic spikes (thundering herd), a **randomized jitter of +/- 15%** is automatically applied to each polling cycle.
 
 ### Environment Variables
 
@@ -180,15 +179,13 @@ If the value of the `x-env-format` key is `json`, the environment variable value
    - Local configuration
 
 2. If a configuration option is specified in multiple sources, the value from the source with higher precedence (as listed above) is used.
-3. When a hot-reload occurs, the **Remote configuration** part is updated, and the merge is re-calculated, ensuring environment variables still win.
 
 ### Validation
 
-1. After merging (and after every hot-reload), the final configuration is validated against the defined schema using ajv.
+1. After merging, the final configuration is validated against the defined schema using ajv.
 2. The validation ensures that all required properties are present, and the types and values of properties conform to the schema.
 3. Any default value according to the schema is added to the final object.
-4. If the validation fails, an error is thrown (for initial boot) or logged (for background updates), indicating the invalid properties and their issues.
-5. **Atomic Updates:** The `ConfigInstance` only updates its internal state if the new configuration passes validation. If validation fails during a hot-reload, the previous valid state is preserved.
+4. If the validation fails, an error is thrown (for initial boot).
 
 
 # Error handling
