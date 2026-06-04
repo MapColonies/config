@@ -122,15 +122,12 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
 };
 
 /**
- * Represents a live configuration instance.
- * When hot-reloading is enabled, this instance acts as a state machine that updates its internal
- * configuration state dynamically.
+ * Represents a configuration instance.
  * @template T - The type of the configuration schema.
  */
 export interface ConfigInstance<T> {
   /**
    * Retrieves the value at the specified path from the configuration object.
-   * If hot-reloading is active, this returns the value from the most recent configuration update.
    * @template TPath - The type of the path.
    * @param path - The path to the desired value.
    * @returns The value at the specified path.
@@ -139,14 +136,12 @@ export interface ConfigInstance<T> {
 
   /**
    * Retrieves the entire configuration object.
-   * If hot-reloading is active, this returns the most recent configuration state.
    * @returns The entire configuration object.
    */
   getAll: () => T;
 
   /**
    * Retrieves different parts of the configuration object before being merged and validated.
-   * If hot-reloading is active, 'config' reflects the latest remote payload.
    * @returns An object containing the localConfig, config, and envConfig parts of the configuration.
    */
   getConfigParts: () => {

@@ -78,7 +78,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
       .reply(StatusCodes.OK, newConfigData, { headers: { etag: 'etag-2' } });
 
     // Act (Wait for Poll)
-    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE));
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * 2);
 
     // Assert (Updated State)
     expect(onChangeMock).toHaveBeenCalledTimes(1);
@@ -134,7 +134,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
       .reply(StatusCodes.OK, newConfigData, { headers: { etag: 'etag-2' } });
 
     // Act (Wait for Poll)
-    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL);
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * 2);
 
     // Assert
     expect(exitMock).toHaveBeenCalledWith(0);
@@ -190,7 +190,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
       .reply(StatusCodes.OK, newConfigData, { headers: { etag: 'etag-2' } });
 
     // Act (Wait for Poll)
-    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL);
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * 2);
 
     // Assert
     expect(onChangeMock).toHaveBeenCalledTimes(1);
@@ -237,7 +237,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
       .reply(StatusCodes.NOT_MODIFIED);
 
     // Act (Wait for Poll)
-    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE));
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * 2);
 
     // Assert
     expect(onChangeMock).not.toHaveBeenCalled();

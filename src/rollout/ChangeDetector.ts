@@ -76,6 +76,7 @@ export class ChangeDetector {
     } catch (err) {
       debug('Error during onChange callback: %s', (err as Error).message);
     } finally {
+      this.stop();
       process.exit(0);
     }
   }
