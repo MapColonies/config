@@ -82,7 +82,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
       .reply(StatusCodes.OK, newConfigData, { headers: { etag: 'etag-2' } });
 
     // Mock Lock Acquisition and Release
-    client.intercept({ path: '/locks', method: 'POST' }).reply(StatusCodes.CREATED);
+    client.intercept({ path: '/locks', method: 'POST' }).reply(StatusCodes.OK);
     client.intercept({ path: /\/locks\/.*/, method: 'DELETE' }).reply(StatusCodes.NO_CONTENT);
 
     // Act (Wait for Poll)
@@ -333,7 +333,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
       .reply(StatusCodes.OK, newConfigData, { headers: { etag: 'etag-2' } });
 
     // Mock Lock Acquisition and Release
-    client.intercept({ path: '/locks', method: 'POST' }).reply(StatusCodes.CREATED);
+    client.intercept({ path: '/locks', method: 'POST' }).reply(StatusCodes.OK);
     client.intercept({ path: /\/locks\/.*/, method: 'DELETE' }).reply(StatusCodes.NO_CONTENT);
 
     // Act (Wait for Poll)
@@ -396,7 +396,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
       .reply(StatusCodes.OK, badConfigData, { headers: { etag: 'bad-etag' } });
 
     // Mock Lock Acquisition and Release
-    client.intercept({ path: '/locks', method: 'POST' }).reply(StatusCodes.CREATED);
+    client.intercept({ path: '/locks', method: 'POST' }).reply(StatusCodes.OK);
     client.intercept({ path: /\/locks\/.*/, method: 'DELETE' }).reply(StatusCodes.NO_CONTENT);
 
     // Act (Wait for Poll)

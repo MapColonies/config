@@ -88,7 +88,7 @@ export async function acquireLock(key: string, callerId: string, limit: number, 
     headers: { 'Content-Type': 'application/json' },
   });
 
-  if (res.statusCode === statusCodes.CREATED) {
+  if (res.statusCode === statusCodes.OK) {
     debug('Lock acquired successfully');
     return { acquired: true };
   }
@@ -100,8 +100,8 @@ export async function acquireLock(key: string, callerId: string, limit: number, 
     return { acquired: false, retryAfter };
   }
 
-  if (res.statusCode > statusCodes.NOT_FOUND) {
-    debug('Failed to acquire lock. Status code: %d', res.statusCode);
+  if (res.statusCode === statusCodes.BAD_REQUEST) {
+    debug('Failed to acquire lock. Bad request');
     throw createConfigError('httpResponseError', 'Failed to acquire lock', await createHttpErrorPayload(res));
   }
 
@@ -117,9 +117,14 @@ export async function releaseLock(key: string, callerId: string): Promise<void> 
   try {
     const res = await request(url, { method: 'DELETE' });
 
-    if (res.statusCode === statusCodes.NO_CONTENT || res.statusCode === statusCodes.NOT_FOUND) {
+    if (res.statusCode === statusCodes.NO_CONTENT) {
       debug('Lock released successfully');
       return;
+    }
+
+    if (res.statusCode === statusCodes.BAD_REQUEST) {
+      debug('Failed to release lock. Bad request');
+      throw createConfigError('httpResponseError', 'Failed to release lock', await createHttpErrorPayload(res));
     }
 
     debug('Unexpected status code while releasing lock: %d', res.statusCode);
