@@ -26,8 +26,8 @@ const configInstance = await config({
   version: 'latest',
   offlineMode: false,
   pollIntervalMs: 30000,
-  onChange: (updatedConfig) => {
-    console.log('Configuration updated:', updatedConfig);
+  onChange: () => {
+    console.log('Configuration changed! The process will now restart...');
     // Note: The SDK will forcefully terminate the process
     // immediately after this callback completes to trigger a fresh restart.
   }
@@ -42,14 +42,14 @@ This section describes the API provided by the package for interacting with the 
 
 ### `ConfigInstance<T>`
 
-The `ConfigInstance` interface represents your way to interact with the configuration. When hot-reloading is enabled, this instance acts as a **live state machine**, updating its internal state dynamically.
-`T` is the typescript type associated with the chosen schema. it can be imported from the `@map-colonies/schemas` package.
+The `ConfigInstance` interface represents your way to interact with the configuration.
+`T` is the typescript type associated with the chosen schema. It can be imported from the `@map-colonies/schemas` package.
 
 #### Methods
 
 ##### `get<TPath extends string>(path: TPath): _.GetFieldType<T, TPath>`
 
-- **Description**: Retrieves the value at the specified path from the configuration object. If hot-reloading is active, this returns the value from the **most recent** configuration update.
+- **Description**: Retrieves the value at the specified path from the configuration object.
 - **Parameters**:
   - `path` (`TPath`): The path to the desired value.
 - **Returns**: The value at the specified path.
@@ -61,7 +61,7 @@ The `ConfigInstance` interface represents your way to interact with the configur
 
 ##### `getConfigParts(): { localConfig: object; config: object; envConfig: object }`
 
-- **Description**: Retrieves different parts of the configuration object before being merged and validated. If hot-reloading is active, the `config` part reflects the **latest remote payload**.
+- **Description**: Retrieves different parts of the configuration object before being merged and validated.
 - **Returns**: An object containing the `localConfig`, `config`, and `envConfig` parts of the configuration.
   - `localConfig`: The local configuration object.
   - `config`: The remote configuration object.
@@ -206,13 +206,11 @@ The package supports merging configurations from multiple sources (local, remote
 
 1. The remote configuration is fetched from the server specified by the `configServerUrl` option.
 2. If the `version` is set to `'latest'`, the latest version of the configuration is fetched. Otherwise, the specified version is fetched.
-3. **Continuous Polling:** If an `onChange` callback is provided, the SDK continuously polls the server using HTTP ETags (`If-None-Match`). When a `200 OK` is received (indicating a change), the configuration is automatically re-merged and the callback is triggered. `304 Not Modified` responses are silently ignored. To prevent cluster-wide traffic spikes (thundering herd), a **randomized jitter of +/- 15%** is automatically applied to each polling cycle.
-4. **Hard Termination Lifecycle:** The SDK follows a "Stupid Client" philosophy. Upon a successful configuration fetch and lock acquisition, it executes the `onChange` callback. Regardless of whether the callback succeeds or fails, the SDK will gracefully release the lock and then **immediately terminate the process (`process.exit(0)`)**. This delegates state reconciliation and service recovery to the container orchestrator (e.g., Kubernetes).
-5. **Distributed Semaphore Locking:** To control rollout concurrency across a cluster, the SDK implements a distributed locking mechanism using four parameters: `key` (opaque identifier), `callerId` (instance ID), `ttl` (lock duration), and `limit` (max concurrent locks).
+3. **Continuous Polling:** The SDK continuously polls the server using HTTP ETags (`If-None-Match`). When a `200 OK` is received (indicating a change), the `onChange` callback is triggered (if provided), and the process is then terminated to allow for a fresh start with the new configuration. `304 Not Modified` responses are silently ignored. To prevent cluster-wide traffic spikes (thundering herd), a **randomized jitter of +/- 15%** is automatically applied to each polling cycle.
+4. **Distributed Semaphore Locking:** To control rollout concurrency across a cluster, the SDK implements a distributed locking mechanism using four parameters: `key` (opaque identifier), `callerId` (instance ID), `ttl` (lock duration), and `limit` (max concurrent locks).
     - **Lock Acquisition:** Before triggering the `onChange` callback during a hot-reload, the SDK attempts to acquire a lock from the configuration server.
     - **Lock Release:** The lock is automatically released after the `onChange` callback completes (whether it succeeds or throws).
     - **423 Locked & Retry-After:** If the server returns `423 Locked`, it indicates the rollout limit has been reached. The SDK will respect the `Retry-After` header provided by the server, waiting for the specified duration before attempting to acquire the lock again.
-    - **Cold-Start Bypass:** Distributed locking is **only** active during hot-reloads. Initial configuration fetches during application startup (cold-start) always bypass the lock to ensure immediate availability.
 
 ### Environment Variables
 
@@ -235,8 +233,7 @@ If the value of the `x-env-format` key is `json`, the environment variable value
 1. After merging (and after every hot-reload), the final configuration is validated against the defined schema using ajv.
 2. The validation ensures that all required properties are present, and the types and values of properties conform to the schema.
 3. Any default value according to the schema is added to the final object.
-4. If the validation fails, an error is thrown (for initial boot) or logged (for background updates), indicating the invalid properties and their issues.
-5. **Atomic Updates:** The `ConfigInstance` only updates its internal state if the new configuration passes validation. If validation fails during a hot-reload, the previous valid state is preserved.
+4. If the validation fails, an error is thrown (for initial boot).
 
 
 # Error handling

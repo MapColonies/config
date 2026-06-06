@@ -17,9 +17,9 @@ export class ChangeDetector {
   public constructor(
     private readonly schemaId: string,
     private readonly options: BaseOptions,
+    private readonly initialEtag: string,
     private readonly lockCoordinator: LockCoordinator,
-    private readonly onConfigUpdate: (newRemoteConfig: object) => void | Promise<void>,
-    initialEtag: string
+    private readonly onConfigUpdate?: () => void | Promise<void>
   ) {
     this.currentEtag = initialEtag;
   }
@@ -74,7 +74,9 @@ export class ChangeDetector {
     try {
       await this.lockCoordinator.acquire();
       try {
-        await this.onConfigUpdate(response.config.config);
+        if (this.onConfigUpdate) {
+          await this.onConfigUpdate();
+        }
       } catch (err) {
         debug('Error during onChange callback: %s', (err as Error).message);
       } finally {
@@ -84,6 +86,7 @@ export class ChangeDetector {
           debug('Best-effort lock release failed: %s', (releaseErr as Error).message);
         }
         debug('Hard termination triggered. Exiting process.');
+        this.stop();
         process.exit(0);
       }
     } catch (err) {

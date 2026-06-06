@@ -115,7 +115,7 @@ export type ConfigOptions<T extends SchemaWithType> = Prettify<
     /**
      * The callback function that is triggered when the configuration changes.
      */
-    onChange?: (config: unknown) => void | Promise<void>;
+    onChange?: () => void | Promise<void>;
   }
 >;
 
@@ -145,9 +145,7 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
 };
 
 /**
- * Represents a live configuration instance.
- * When hot-reloading is enabled, this instance acts as a state machine that updates its internal
- * configuration state dynamically.
+ * Represents a configuration instance.
  * @template T - The type of the configuration schema.
  */
 export interface ConfigInstance<T> {
