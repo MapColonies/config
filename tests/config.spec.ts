@@ -222,6 +222,7 @@ describe('config', () => {
         localConfigPath: './tests/config',
         offlineMode: true,
         pollIntervalMs: 3000,
+        terminatePod: true,
       });
     });
 

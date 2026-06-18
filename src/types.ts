@@ -71,6 +71,11 @@ export interface BaseOptions {
    * @default 30000
    */
   pollIntervalMs?: number;
+  /**
+   * Indicates whether the pod will be terminated after an update.
+   * @default true
+   */
+  terminatePod: boolean;
 }
 
 /**
@@ -111,6 +116,7 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
     ignoreServerIsOlderVersionError: { type: 'boolean', nullable: true },
     localConfigPath: { type: 'string', default: './config', nullable: true },
     pollIntervalMs: { type: 'integer', default: 30000, nullable: true },
+    terminatePod: { type: 'boolean', default: true },
   },
 };
 
