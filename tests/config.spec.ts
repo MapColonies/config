@@ -227,6 +227,7 @@ describe('config', () => {
         pollIntervalMs: 3000,
         disableHotReload: false,
         ignoreServerIsOlderVersionError: false,
+        terminatePod: true,
       });
     });
 

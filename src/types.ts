@@ -77,6 +77,11 @@ export interface BaseOptions {
    * @default false
    */
   disableHotReload: boolean;
+  /**
+   * Indicates whether the pod will be terminated after an update.
+   * @default true
+   */
+  terminatePod: boolean;
 }
 
 /**
@@ -118,6 +123,7 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
     localConfigPath: { type: 'string', default: './config' },
     pollIntervalMs: { type: 'integer', default: 30000 },
     disableHotReload: { type: 'boolean', default: false },
+    terminatePod: { type: 'boolean', default: true },
   },
 };
 

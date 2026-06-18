@@ -16,6 +16,7 @@ const defaultOptions: BaseOptions = {
   ignoreServerIsOlderVersionError: false,
   localConfigPath: './config',
   disableHotReload: false,
+  terminatePod: true,
 };
 
 const envOptions: Partial<Record<keyof BaseOptions, string>> = {
@@ -26,6 +27,7 @@ const envOptions: Partial<Record<keyof BaseOptions, string>> = {
   ignoreServerIsOlderVersionError: process.env.CONFIG_IGNORE_SERVER_IS_OLDER_VERSION_ERROR,
   pollIntervalMs: process.env.CONFIG_POLL_INTERVAL_MS,
   disableHotReload: process.env.CONFIG_DISABLE_HOT_RELOAD,
+  terminatePod: process.env.CONFIG_TERMINATE_POD,
 };
 
 // in order to merge correctly the keys should not exist, undefined is not enough
