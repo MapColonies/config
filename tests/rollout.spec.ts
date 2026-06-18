@@ -292,13 +292,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
 
   it('should not start polling if disableHotReload is true', async () => {
     // Arrange
-    const initialConfigData = {
-      configName: 'name',
-      schemaId: commonDbPartialV1.$id,
-      version: 1,
-      config: { host: 'initial-host' },
-      createdAt: 0,
-    };
+    const initialConfigData = createMockConfigData();
 
     client
       .intercept({ path: '/capabilities', method: 'GET' })
@@ -307,16 +301,12 @@ describe('Continuous Polling (ChangeDetector)', () => {
       .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
       .reply(StatusCodes.OK, initialConfigData, { headers: { etag: 'etag-1' } });
 
-    const onChangeMock = vi.fn();
-
     // Act
     await config({
       configName: 'name',
       version: 1,
       schema: commonDbPartialV1,
-      configServerUrl: URL,
       localConfigPath: './tests/config',
-      pollIntervalMs: DEFAULT_POLL_INTERVAL,
       onChange: onChangeMock,
       disableHotReload: true,
     });
