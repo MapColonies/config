@@ -49,7 +49,11 @@ export class ChangeDetector {
     this.timer = setTimeout(() => {
       this.poll()
         .catch((err) => {
-          debug('Error during polling: %s', (err as Error).message);
+          if (isConfigError(err, 'httpResponseError') || isConfigError(err, 'httpGeneralError')) {
+            debug('Error during polling: %s', err.message);
+          } else {
+            debug('Unknown error during polling: %O', err);
+          }
         })
         .finally(() => {
           if (this.timer !== undefined) {
