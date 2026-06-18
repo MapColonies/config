@@ -60,7 +60,7 @@ export function validate<T>(ajv: ajv, schema: SchemaObject, data: unknown): [Val
 
   if (!valid) {
     debug('validation failed with errors %j', ajv.errors);
-    const betterErrors = betterAjvErrors({ schema: schema as Parameters<typeof betterAjvErrors>[0]['schema'], data, errors: ajv.errors });
+    const betterErrors = betterAjvErrors({ schema: schema, data, errors: ajv.errors });
     return [enrichErrors(betterErrors, ajv.errors as ErrorObject[]), undefined];
   }
 
