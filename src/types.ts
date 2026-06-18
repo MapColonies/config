@@ -56,21 +56,27 @@ export interface BaseOptions {
   /**
    * Indicates whether the configuration should be loaded in offline mode.
    */
-  offlineMode?: boolean;
+  offlineMode: boolean;
   /**
    * Indicates whether to ignore the error when the server version is older than the requested version.
    */
-  ignoreServerIsOlderVersionError?: boolean;
+  ignoreServerIsOlderVersionError: boolean;
   /**
    * The path to the local configuration folder.
    * @default './config'
    */
-  localConfigPath?: string;
+  localConfigPath: string;
   /**
    * The polling interval in milliseconds.
    * @default 30000
    */
-  pollIntervalMs?: number;
+  pollIntervalMs: number;
+  /**
+   * Indicates whether hot-reloading should be disabled.
+   * If true, the SDK fetches the remote configuration exactly once upon startup.
+   * @default false
+   */
+  disableHotReload: boolean;
   /**
    * Indicates whether the pod will be terminated after an update.
    * @default true
@@ -112,10 +118,11 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
       ],
     },
     configServerUrl: { type: 'string' },
-    offlineMode: { type: 'boolean', nullable: true },
-    ignoreServerIsOlderVersionError: { type: 'boolean', nullable: true },
-    localConfigPath: { type: 'string', default: './config', nullable: true },
-    pollIntervalMs: { type: 'integer', default: 30000, nullable: true },
+    offlineMode: { type: 'boolean' },
+    ignoreServerIsOlderVersionError: { type: 'boolean' },
+    localConfigPath: { type: 'string', default: './config' },
+    pollIntervalMs: { type: 'integer', default: 30000 },
+    disableHotReload: { type: 'boolean', default: false },
     terminatePod: { type: 'boolean', default: true },
   },
 };

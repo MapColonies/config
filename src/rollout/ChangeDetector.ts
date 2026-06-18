@@ -39,7 +39,7 @@ export class ChangeDetector {
     if (this.timer) {
       clearTimeout(this.timer);
     }
-    const baseInterval = this.options.pollIntervalMs!;
+    const baseInterval = this.options.pollIntervalMs;
     const jitter = baseInterval * JITTER_PERCENTAGE;
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     const randomJitter = (Math.random() * 2 - 1) * jitter;

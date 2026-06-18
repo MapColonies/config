@@ -289,4 +289,32 @@ describe('Continuous Polling (ChangeDetector)', () => {
       expect(time).toBeLessThanOrEqual(maxWait);
     });
   });
+
+  it('should not start polling if disableHotReload is true', async () => {
+    // Arrange
+    const initialConfigData = createMockConfigData();
+
+    client
+      .intercept({ path: '/capabilities', method: 'GET' })
+      .reply(StatusCodes.OK, { serverVersion: '2.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
+    client
+      .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
+      .reply(StatusCodes.OK, initialConfigData, { headers: { etag: 'etag-1' } });
+
+    // Act
+    await config({
+      configName: 'name',
+      version: 1,
+      schema: commonDbPartialV1,
+      localConfigPath: './tests/config',
+      onChange: onChangeMock,
+      disableHotReload: true,
+    });
+
+    // Advance time beyond the polling interval
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE) + 1);
+
+    // Assert
+    expect(onChangeMock).not.toHaveBeenCalled();
+  });
 });

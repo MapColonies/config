@@ -43,7 +43,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
   debug('config called with options: %j', { ...options, schema: options.schema.$id });
   const { schema: baseSchema, metricsRegistry, onChange, ...unvalidatedOptions } = options;
   const initOptions = initializeOptions(unvalidatedOptions);
-  const { configName, offlineMode, version, ignoreServerIsOlderVersionError } = initOptions;
+  const { configName, offlineMode, version, ignoreServerIsOlderVersionError, disableHotReload } = initOptions;
 
   // Load Local and Env Configs First (Independent of remote state)
   const dereferencedSchema = await loadSchema(baseSchema);
@@ -79,7 +79,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
   let validatedConfig: ReturnType<typeof mergeAndValidate>;
 
   // Handle Remote Config and Polling
-  if (offlineMode !== true) {
+  if (!offlineMode) {
     debug('handling fetching remote data');
     // check if the server is using an older version of the schemas package
     const capabilitiesResponse = await getServerCapabilities();
@@ -92,7 +92,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
         satisfies: semverSatisfies,
       });
     }
-    if (ignoreServerIsOlderVersionError !== true && gt(LOCAL_SCHEMAS_PACKAGE_VERSION, capabilitiesResponse.schemasPackageVersion)) {
+    if (!ignoreServerIsOlderVersionError && gt(LOCAL_SCHEMAS_PACKAGE_VERSION, capabilitiesResponse.schemasPackageVersion)) {
       debug(
         'server is using an older version of the schemas package. local: %s, remote: %s',
         LOCAL_SCHEMAS_PACKAGE_VERSION,
@@ -131,8 +131,10 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
     validatedConfig = mergeAndValidate(remoteConfig);
 
     // Setup polling
-    changeDetector = new ChangeDetector(baseSchema.$id, initOptions, currentEtag, onChange);
-    changeDetector.start();
+    if (!disableHotReload) {
+      changeDetector = new ChangeDetector(baseSchema.$id, initOptions, currentEtag, onChange);
+      changeDetector.start();
+    }
   } else {
     // If offline, bypass remote and just merge local/env
     validatedConfig = mergeAndValidate({});

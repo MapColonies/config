@@ -215,6 +215,8 @@ describe('config', () => {
         localConfigPath: './tests/config',
         offlineMode: true,
         pollIntervalMs: 3000,
+        disableHotReload: false,
+        ignoreServerIsOlderVersionError: false,
         terminatePod: true,
       });
     });

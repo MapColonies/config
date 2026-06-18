@@ -119,6 +119,7 @@ This package allows you to configure various options for loading and managing co
 ### `ignoreServerIsOlderVersionError`
 - **Type**: `boolean`
 - **Optional**: `true`
+- **Default**: `false`
 - **Description**: Indicates whether to ignore the error when the server version is older than the requested version.
 - **Environment Variable**: `CONFIG_IGNORE_SERVER_IS_OLDER_VERSION_ERROR`
 
@@ -127,6 +128,13 @@ This package allows you to configure various options for loading and managing co
 - **Optional**: `true`
 - **Default**: `./config`
 - **Description**: The path to the local configuration folder.
+
+### `disableHotReload`
+- **Type**: `boolean`
+- **Optional**: `true`
+- **Default**: `false`
+- **Description**: Indicates whether hot-reloading should be disabled. If true, the SDK fetches the remote configuration exactly once upon startup and never starts the background polling loop.
+- **Environment Variable**: `CONFIG_DISABLE_HOT_RELOAD`
 
 ### `pollIntervalMs`
 - **Type**: `number`
@@ -150,6 +158,7 @@ The following environment variables can be used to configure the options:
 - `CONFIG_OFFLINE_MODE`: Sets the `offlineMode` option.
 - `CONFIG_IGNORE_SERVER_IS_OLDER_VERSION_ERROR`: Sets the `ignoreServerIsOlderVersionError` option.
 - `CONFIG_POLL_INTERVAL_MS`: Sets the `pollIntervalMs` option.
+- `CONFIG_DISABLE_HOT_RELOAD`: Sets the `disableHotReload` option.
 
 ## Configuration Merging and Validation
 
