@@ -1,6 +1,7 @@
 import { getRemoteConfig } from '../httpClient';
 import { BaseOptions } from '../types';
 import { createDebug } from '../utils/debug';
+import { isConfigError } from '../errors';
 
 const debug = createDebug('changeDetector');
 
@@ -9,7 +10,7 @@ const debug = createDebug('changeDetector');
  * If a change is detected, it invokes the provided callback with the new configuration.
  */
 export class ChangeDetector {
-  private readonly currentEtag: string;
+  private currentEtag: string;
   private timer?: NodeJS.Timeout;
 
   public constructor(
@@ -49,16 +50,26 @@ export class ChangeDetector {
       return;
     }
 
-    debug('Config change detected');
+    debug('Config change detected. Stopping polling. New etag: %s', response.etag);
+    this.stop();
     try {
       if (this.onConfigUpdate) {
         await this.onConfigUpdate();
       }
     } catch (err) {
-      debug('Error during onChange callback: %s', (err as Error).message);
+      if (isConfigError(err, 'httpResponseError') || isConfigError(err, 'httpGeneralError')) {
+        debug('Error during onChange callback: %s', err.message);
+      } else {
+        debug('Error during onChange callback: %s', err instanceof Error ? err.message : String(err));
+      }
     } finally {
-      this.stop();
-      process.exit(0);
+      if (this.options.terminatePod) {
+        debug('Pod termination is expected by the user.');
+      } else {
+        this.currentEtag = response.etag;
+        debug('Pod termination is not expected.');
+        this.start();
+      }
     }
   }
 }
