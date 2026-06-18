@@ -21,6 +21,7 @@ const defaultOptions: BaseOptions = {
   rolloutLimit: 1,
   lockTtlSeconds: 20,
   callerId: hostname(),
+  terminatePod: true,
 };
 
 const envOptions: Partial<Record<keyof BaseOptions, string>> = {
@@ -35,6 +36,7 @@ const envOptions: Partial<Record<keyof BaseOptions, string>> = {
   rolloutLimit: process.env.CONFIG_ROLLOUT_LIMIT,
   lockTtlSeconds: process.env.CONFIG_LOCK_TTL_SECONDS,
   callerId: process.env.CONFIG_CALLER_ID,
+  terminatePod: process.env.CONFIG_TERMINATE_POD,
 };
 
 // in order to merge correctly the keys should not exist, undefined is not enough

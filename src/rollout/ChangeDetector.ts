@@ -2,6 +2,7 @@ import { JITTER_PERCENTAGE } from '../constants';
 import { getRemoteConfig } from '../httpClient';
 import { BaseOptions } from '../types';
 import { createDebug } from '../utils/debug';
+import { isConfigError } from '../errors';
 import { LockCoordinator } from './LockCoordinator';
 
 const debug = createDebug('changeDetector');
@@ -11,7 +12,7 @@ const debug = createDebug('changeDetector');
  * If a change is detected, it invokes the provided callback with the new configuration.
  */
 export class ChangeDetector {
-  private readonly currentEtag: string;
+  private currentEtag: string;
   private timer?: NodeJS.Timeout;
 
   public constructor(
@@ -50,7 +51,11 @@ export class ChangeDetector {
     this.timer = setTimeout(() => {
       this.poll()
         .catch((err) => {
-          debug('Error during polling: %s', (err as Error).message);
+          if (isConfigError(err, 'httpResponseError') || isConfigError(err, 'httpGeneralError')) {
+            debug('Error during polling: %s', err.message);
+          } else {
+            debug('Unknown error during polling: %O', err);
+          }
         })
         .finally(() => {
           if (this.timer !== undefined) {
@@ -70,7 +75,8 @@ export class ChangeDetector {
       return;
     }
 
-    debug('Config change detected');
+    debug('Config change detected. Stopping polling. New etag: %s', response.etag);
+    this.stop();
     try {
       await this.lockCoordinator.acquire();
       try {
@@ -91,6 +97,19 @@ export class ChangeDetector {
       }
     } catch (err) {
       debug('Error during lock acquisition: %s', (err as Error).message);
+      if (isConfigError(err, 'httpResponseError') || isConfigError(err, 'httpGeneralError')) {
+        debug('Error during onChange callback: %s', err.message);
+      } else {
+        debug('Error during onChange callback: %s', err instanceof Error ? err.message : String(err));
+      }
+    } finally {
+      if (this.options.terminatePod) {
+        debug('Pod termination is expected by the user.');
+      } else {
+        this.currentEtag = response.etag;
+        debug('Pod termination is not expected.');
+        this.start();
+      }
     }
   }
 }

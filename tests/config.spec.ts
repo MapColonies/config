@@ -233,6 +233,7 @@ describe('config', () => {
         rolloutKey: PACKAGE_NAME,
         callerId: hostname(),
         rolloutLimit: 1,
+        terminatePod: true,
       });
     });
 

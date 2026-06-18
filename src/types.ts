@@ -96,6 +96,11 @@ export interface BaseOptions {
    * @default 20
    */
   lockTtlSeconds: number;
+  /**
+   * Indicates whether the pod will be terminated after an update.
+   * @default true
+   */
+  terminatePod: boolean;
 }
 
 /**
@@ -141,6 +146,7 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
     callerId: { type: 'string' },
     rolloutLimit: { type: 'integer', minimum: 1, default: 1 },
     lockTtlSeconds: { type: 'integer', minimum: 1, default: 20 },
+    terminatePod: { type: 'boolean', default: true },
   },
 };
 
