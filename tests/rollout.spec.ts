@@ -24,7 +24,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
     vi.restoreAllMocks();
   });
 
-  it('should trigger onChange and exit when polling returns a new config (200 OK)', async () => {
+  it('should trigger onChange when polling returns a new config (200 OK)', async () => {
     // Arrange
     const initialConfigData = {
       configName: 'name',
