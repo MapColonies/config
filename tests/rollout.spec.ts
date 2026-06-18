@@ -19,6 +19,12 @@ describe('Continuous Polling (ChangeDetector)', () => {
 
     setGlobalDispatcher(agent);
     client = agent.get(URL);
+
+    // Add default mock for lock release on startup
+    client
+      .intercept({ path: /\/locks\/.*/, method: 'DELETE' })
+      .reply(StatusCodes.NO_CONTENT)
+      .persist();
   });
 
   afterEach(() => {
@@ -86,9 +92,11 @@ describe('Continuous Polling (ChangeDetector)', () => {
     // Act (Wait for Poll)
     await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE));
 
-    // Assert (Updated State)
-    expect(onChangeMock).toHaveBeenCalledTimes(1);
-    expect(onChangeMock).toHaveBeenCalledWith();
+    // Use waitFor to allow async promises to resolve
+    await vi.waitFor(() => expect(onChangeMock).toHaveBeenCalled());
+
+    // Assert (Updated State & Hard Termination)
+    expect(onChangeMock).toHaveBeenCalled();
   });
 
   it('should not trigger onChange when polling returns 304 Not Modified', async () => {

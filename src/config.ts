@@ -31,7 +31,7 @@ const semverSatisfies = '2.x';
  * polling mechanism. When a configuration change is detected, the SDK
  * will execute the `onChange` callback (if provided).
  * Depending on the `terminatePod` option (default `true`), it will either
- * stop polling and wait for the user to terminate the process, or continue polling.
+ * stop polling and wait for the user to terminate the process, or release the lock and continue polling.
  *
  * @template T - The type of the configuration schema.
  * @param {ConfigOptions<T>} options - The options for retrieving the configuration.
@@ -134,6 +134,7 @@ export async function config<T extends { [typeSymbol]: unknown; $id: string }>(
     // Setup polling
     if (!disableHotReload) {
       const lockCoordinator = new LockCoordinator(initOptions);
+      await lockCoordinator.release();
       changeDetector = new ChangeDetector(baseSchema.$id, initOptions, currentEtag, lockCoordinator, onChange);
       changeDetector.start();
     }

@@ -98,6 +98,8 @@ export interface BaseOptions {
   lockTtlSeconds: number;
   /**
    * Indicates whether the pod will be terminated after an update.
+   * If true, the SDK will stop polling and not release the lock.
+   * If false, the SDK will release the lock and continue polling.
    * @default true
    */
   terminatePod: boolean;

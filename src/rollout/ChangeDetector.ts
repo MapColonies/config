@@ -77,23 +77,10 @@ export class ChangeDetector {
 
     debug('Config change detected. Stopping polling. New etag: %s', response.etag);
     this.stop();
+    await this.lockCoordinator.acquire();
     try {
-      await this.lockCoordinator.acquire();
-      try {
-        if (this.onConfigUpdate) {
-          await this.onConfigUpdate();
-        }
-      } catch (err) {
-        debug('Error during onChange callback: %s', (err as Error).message);
-      } finally {
-        try {
-          await this.lockCoordinator.release();
-        } catch (releaseErr) {
-          debug('Best-effort lock release failed: %s', (releaseErr as Error).message);
-        }
-        debug('Hard termination triggered. Exiting process.');
-        this.stop();
-        process.exit(0);
+      if (this.onConfigUpdate) {
+        await this.onConfigUpdate();
       }
     } catch (err) {
       debug('Error during lock acquisition: %s', (err as Error).message);
@@ -109,6 +96,7 @@ export class ChangeDetector {
         this.currentEtag = response.etag;
         debug('Pod termination is not expected.');
         this.start();
+        await this.lockCoordinator.release();
       }
     }
   }

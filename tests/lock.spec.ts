@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, MockInstance, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Interceptable, MockAgent, setGlobalDispatcher } from 'undici';
 import { commonDbPartialV1 } from '@map-colonies/schemas';
 import { StatusCodes } from 'http-status-codes';
@@ -10,17 +10,21 @@ const DEFAULT_POLL_INTERVAL = 10000;
 
 describe('Distributed Semaphore Locking', () => {
   let client: Interceptable;
-  let exitSpy: MockInstance<typeof process.exit>;
   const instances: { stop: () => void }[] = [];
 
   beforeEach(() => {
     vi.useFakeTimers();
-    exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const agent = new MockAgent();
     agent.disableNetConnect();
 
     setGlobalDispatcher(agent);
     client = agent.get(URL);
+
+    // Add default mock for lock release on startup
+    client
+      .intercept({ path: /\/locks\/.*/, method: 'DELETE' })
+      .reply(StatusCodes.NO_CONTENT)
+      .persist();
   });
 
   afterEach(() => {
@@ -94,7 +98,7 @@ describe('Distributed Semaphore Locking', () => {
 
     // Act (Wait for Poll)
     await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE));
-    await vi.waitFor(() => expect(exitSpy).toHaveBeenCalledWith(0));
+    await vi.waitFor(() => expect(onChangeMock).toHaveBeenCalled());
 
     // Assert
     expect(onChangeMock).toHaveBeenCalled();
@@ -131,7 +135,6 @@ describe('Distributed Semaphore Locking', () => {
 
     // Assert
     expect(configInstance.get('host')).toBe('initial-host');
-    expect(exitSpy).not.toHaveBeenCalled();
   });
 
   it('should wait and retry if lock acquisition returns 423 Locked with Retry-After', async () => {
@@ -192,7 +195,7 @@ describe('Distributed Semaphore Locking', () => {
 
     // Wait for the retry interval (2 seconds)
     await vi.advanceTimersByTimeAsync(2001);
-    await vi.waitFor(() => expect(exitSpy).toHaveBeenCalledWith(0));
+    await vi.waitFor(() => expect(onChangeMock).toHaveBeenCalled());
 
     // Assert
     expect(onChangeMock).toHaveBeenCalled();
