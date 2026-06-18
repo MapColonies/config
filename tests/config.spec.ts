@@ -5,6 +5,7 @@ import { commonDbPartialV1, commonS3PartialV1 } from '@map-colonies/schemas';
 import { StatusCodes } from 'http-status-codes';
 import { config } from '../src/config';
 import { PACKAGE_NAME } from '../src/constants';
+import { createMockConfigData } from './mocks';
 
 const URL = 'http://localhost:8080';
 describe('config', () => {
@@ -19,15 +20,11 @@ describe('config', () => {
     });
 
     it('should return the config with all the default values', async () => {
-      const configData = {
-        configName: 'name',
-        schemaId: commonDbPartialV1.$id,
-        version: 1,
+      const configData = createMockConfigData({
         config: {
           host: 'avi',
         },
-        createdAt: 0,
-      };
+      });
 
       client
         .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
@@ -42,7 +39,6 @@ describe('config', () => {
         schema: commonDbPartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
-        onChange: async () => {},
       });
 
       const conf = configInstance.getAll();
@@ -128,7 +124,6 @@ describe('config', () => {
         schema: commonDbPartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
-        onChange: async () => {},
       });
 
       const conf = configInstance.getAll();
@@ -166,15 +161,11 @@ describe('config', () => {
     });
 
     it('should return all the config parts', async () => {
-      const configData = {
-        configName: 'name',
-        schemaId: commonDbPartialV1.$id,
-        version: 1,
+      const configData = createMockConfigData({
         config: {
           host: 'avi',
         },
-        createdAt: 0,
-      };
+      });
 
       client
         .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
@@ -189,7 +180,6 @@ describe('config', () => {
         schema: commonDbPartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
-        onChange: async () => {},
       });
 
       const parts = configInstance.getConfigParts();
@@ -238,15 +228,11 @@ describe('config', () => {
     });
 
     it('should throw an error if the schema of the config is different from the schema of the server', async () => {
-      const configData = {
-        configName: 'name',
-        schemaId: commonDbPartialV1.$id,
-        version: 1,
+      const configData = createMockConfigData({
         config: {
           host: 'avi',
         },
-        createdAt: 0,
-      };
+      });
 
       client
         .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonS3PartialV1.$id}`, method: 'GET' })
@@ -261,7 +247,6 @@ describe('config', () => {
         schema: commonS3PartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
-        onChange: async () => {},
       });
 
       await expect(promise).rejects.toThrow('The schema version of the remote config does not match the schema version of the local config');
@@ -293,7 +278,6 @@ describe('config', () => {
         schema: commonDbPartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
-        onChange: async () => {},
       });
 
       await expect(promise).rejects.toThrow('Config validation error');
@@ -392,7 +376,6 @@ describe('config', () => {
         schema: commonDbPartialV1,
         configServerUrl: URL,
         localConfigPath: './tests/config',
-        onChange: async () => {},
       });
 
       await expect(promise).rejects.toThrow('The server version does not satisfy the required version.');
