@@ -67,7 +67,54 @@ describe('Continuous Polling (ChangeDetector)', () => {
     expect(onChangeMock).toHaveBeenCalled();
   });
 
-  it('should resume polling when terminatePod is false', async () => {
+  it('should stop polling when found new config and terminatePod is true', async () => {
+    // Arrange
+    const initialConfigData = createMockConfigData();
+    const newConfigData = createMockConfigData({ config: { host: 'updated-host' }, createdAt: 1 });
+
+    client
+      .intercept({ path: '/capabilities', method: 'GET' })
+      .reply(StatusCodes.OK, { serverVersion: '2.0.0', schemasPackageVersion: '99.9.9', pubSubEnabled: false });
+    client
+      .intercept({ path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`, method: 'GET' })
+      .reply(StatusCodes.OK, initialConfigData, { headers: { etag: 'etag-1' } });
+
+    // Act
+    await config({
+      configName: 'name',
+      version: 1,
+      schema: commonDbPartialV1,
+      localConfigPath: './tests/config',
+      terminatePod: true,
+      onChange: onChangeMock,
+    });
+
+    // Assert (Initial State)
+    expect(onChangeMock).not.toHaveBeenCalled();
+
+    // Arrange (First config change)
+    client
+      .intercept({
+        path: `/config/name/1?shouldDereference=true&schemaId=${commonDbPartialV1.$id}`,
+        method: 'GET',
+        headers: { 'if-none-match': 'etag-1' },
+      })
+      .reply(StatusCodes.OK, newConfigData, { headers: { etag: 'etag-2' } });
+
+    // Act (Wait for First Poll)
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL);
+
+    // Assert (First change triggered)
+    expect(onChangeMock).toHaveBeenCalledTimes(1);
+
+    // Act (Advance time to see if polling continues)
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL);
+
+    // Assert (Polling stopped, no further calls)
+    expect(onChangeMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should resume polling when found new config and terminatePod is false', async () => {
     // Arrange
     const initialConfigData = createMockConfigData();
     const newConfigData1 = createMockConfigData({ config: { host: 'updated-host' }, createdAt: 1 });
