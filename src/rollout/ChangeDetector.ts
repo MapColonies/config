@@ -1,3 +1,4 @@
+import { JITTER_PERCENTAGE } from '../constants';
 import { getRemoteConfig } from '../httpClient';
 import { BaseOptions } from '../types';
 import { createDebug } from '../utils/debug';
@@ -23,21 +24,43 @@ export class ChangeDetector {
   }
 
   public start(): void {
-    const interval = this.options.pollIntervalMs;
-    debug('Starting change detector with interval %d ms', interval);
-
-    this.timer = setInterval(() => {
-      this.poll().catch((err) => {
-        debug('Error during polling: %s', (err as Error).message);
-      });
-    }, interval);
+    debug('Starting change detector');
+    this.scheduleNextPoll();
   }
 
   public stop(): void {
     if (this.timer) {
-      clearInterval(this.timer);
+      clearTimeout(this.timer);
       this.timer = undefined;
     }
+  }
+
+  private scheduleNextPoll(): void {
+    if (this.timer) {
+      clearTimeout(this.timer);
+    }
+    const baseInterval = this.options.pollIntervalMs!;
+    const jitter = baseInterval * JITTER_PERCENTAGE;
+    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+    const randomJitter = (Math.random() * 2 - 1) * jitter;
+    const nextInterval = baseInterval + randomJitter;
+
+    debug('Scheduling next poll in %d ms', nextInterval);
+    this.timer = setTimeout(() => {
+      this.poll()
+        .catch((err) => {
+          if (isConfigError(err, 'httpResponseError') || isConfigError(err, 'httpGeneralError')) {
+            debug('Error during polling: %s', err.message);
+          } else {
+            debug('Unknown error during polling: %O', err);
+          }
+        })
+        .finally(() => {
+          if (this.timer !== undefined) {
+            this.scheduleNextPoll();
+          }
+        });
+    }, nextInterval);
   }
 
   private async poll(): Promise<void> {
