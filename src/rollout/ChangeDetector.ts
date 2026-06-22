@@ -83,7 +83,6 @@ export class ChangeDetector {
         await this.onConfigUpdate();
       }
     } catch (err) {
-      debug('Error during lock acquisition: %s', (err as Error).message);
       if (isConfigError(err, 'httpResponseError') || isConfigError(err, 'httpGeneralError')) {
         debug('Error during onChange callback: %s', err.message);
       } else {
