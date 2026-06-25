@@ -219,7 +219,7 @@ describe('config', () => {
         pollIntervalMs: 3000,
         disableHotReload: false,
         ignoreServerIsOlderVersionError: false,
-        lockTtlSeconds: 20,
+        lockTtlSeconds: 120,
         rolloutKey: PACKAGE_NAME,
         callerId: hostname(),
         rolloutLimit: 1,

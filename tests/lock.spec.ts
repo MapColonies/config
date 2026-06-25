@@ -72,7 +72,7 @@ describe('Distributed Semaphore Locking', () => {
       .intercept({
         path: '/locks',
         method: 'POST',
-        body: JSON.stringify({ key: 'my-lock', callerId: 'my-caller', limit: 1, ttl: 20 }),
+        body: JSON.stringify({ key: 'my-lock', callerId: 'my-caller', limit: 1, ttl: 120 }),
       })
       .reply(StatusCodes.OK);
 
@@ -128,7 +128,7 @@ describe('Distributed Semaphore Locking', () => {
       .intercept({
         path: '/locks',
         method: 'POST',
-        body: JSON.stringify({ key: 'my-lock', callerId: 'my-caller', limit: 1, ttl: 20 }),
+        body: JSON.stringify({ key: 'my-lock', callerId: 'my-caller', limit: 1, ttl: 120 }),
       })
       .reply(StatusCodes.OK);
 

@@ -19,7 +19,7 @@ const defaultOptions: BaseOptions = {
   disableHotReload: false,
   rolloutKey: PACKAGE_NAME,
   rolloutLimit: 1,
-  lockTtlSeconds: 20,
+  lockTtlSeconds: 120,
   callerId: hostname(),
   terminatePod: true,
 };
