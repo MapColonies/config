@@ -27,9 +27,9 @@ export class LockCoordinator {
         return;
       }
 
+      const MS_IN_SECOND = 1000;
       // If not acquired, wait for retryAfter (in seconds) or a default value of 1 second
-      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-      const waitTime = retryAfter! * 1000;
+      const waitTime = MS_IN_SECOND * (retryAfter ?? 1);
       debug('Lock not acquired, waiting for %d ms', waitTime);
       await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
