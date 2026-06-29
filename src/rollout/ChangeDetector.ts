@@ -3,6 +3,7 @@ import { getRemoteConfig } from '../httpClient';
 import { BaseOptions } from '../types';
 import { createDebug } from '../utils/debug';
 import { isConfigError } from '../errors';
+import { LockCoordinator } from './LockCoordinator';
 
 const debug = createDebug('changeDetector');
 
@@ -17,7 +18,8 @@ export class ChangeDetector {
   public constructor(
     private readonly schemaId: string,
     private readonly options: BaseOptions,
-    initialEtag: string,
+    private readonly initialEtag: string,
+    private readonly lockCoordinator: LockCoordinator,
     private readonly onConfigUpdate?: () => void | Promise<void>
   ) {
     this.currentEtag = initialEtag;
@@ -75,6 +77,7 @@ export class ChangeDetector {
 
     debug('Config change detected. Stopping polling. New etag: %s', response.etag);
     this.stop();
+    await this.lockCoordinator.acquire();
     try {
       if (this.onConfigUpdate) {
         await this.onConfigUpdate();
@@ -92,6 +95,7 @@ export class ChangeDetector {
         this.currentEtag = response.etag;
         debug('Pod termination is not expected.');
         this.start();
+        await this.lockCoordinator.release();
       }
     }
   }

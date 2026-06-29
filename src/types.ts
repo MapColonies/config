@@ -78,7 +78,28 @@ export interface BaseOptions {
    */
   disableHotReload: boolean;
   /**
+   * The key used for the distributed lock (opaque identifier for the resource).
+   */
+  rolloutKey: string;
+  /**
+   * The unique ID of the instance holding the lock.
+   * @default os.hostname()
+   */
+  callerId: string;
+  /**
+   * The maximum number of concurrent rollouts allowed.
+   * @default 1
+   */
+  rolloutLimit: number;
+  /**
+   * The time-to-live for the lock in seconds.
+   * @default 20
+   */
+  lockTtlSeconds: number;
+  /**
    * Indicates whether the pod will be terminated after an update.
+   * If true, the SDK will stop polling and not release the lock.
+   * If false, the SDK will release the lock and continue polling.
    * @default true
    */
   terminatePod: boolean;
@@ -123,6 +144,10 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
     localConfigPath: { type: 'string', default: './config' },
     pollIntervalMs: { type: 'integer', default: 30000 },
     disableHotReload: { type: 'boolean', default: false },
+    rolloutKey: { type: 'string' },
+    callerId: { type: 'string' },
+    rolloutLimit: { type: 'integer', minimum: 1, default: 1 },
+    lockTtlSeconds: { type: 'integer', minimum: 1, default: 20 },
     terminatePod: { type: 'boolean', default: true },
   },
 };
@@ -134,6 +159,7 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
 export interface ConfigInstance<T> {
   /**
    * Retrieves the value at the specified path from the configuration object.
+   * If hot-reloading is active, this returns the value from the most recent configuration update.
    * @template TPath - The type of the path.
    * @param path - The path to the desired value.
    * @returns The value at the specified path.
@@ -142,12 +168,14 @@ export interface ConfigInstance<T> {
 
   /**
    * Retrieves the entire configuration object.
+   * If hot-reloading is active, this returns the most recent configuration state.
    * @returns The entire configuration object.
    */
   getAll: () => T;
 
   /**
    * Retrieves different parts of the configuration object before being merged and validated.
+   * If hot-reloading is active, 'config' reflects the latest remote payload.
    * @returns An object containing the localConfig, config, and envConfig parts of the configuration.
    */
   getConfigParts: () => {

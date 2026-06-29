@@ -76,3 +76,59 @@ export async function getServerCapabilities(): Promise<ServerCapabilities> {
   debug('Server capabilities fetched successfully');
   return (await body.json()) as ServerCapabilities;
 }
+
+export async function acquireLock(key: string, callerId: string, limit: number, ttl: number): Promise<{ acquired: boolean; retryAfter?: number }> {
+  debug('Acquiring lock for key %s (caller: %s) with limit %d and ttl %d', key, callerId, limit, ttl);
+  const { configServerUrl } = getOptions();
+  const url = `${configServerUrl}/locks`;
+
+  const res = await request(url, {
+    method: 'POST',
+    body: JSON.stringify({ key, callerId, limit, ttl }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  if (res.statusCode === statusCodes.OK) {
+    debug('Lock acquired successfully');
+    return { acquired: true };
+  }
+
+  if (res.statusCode === statusCodes.LOCKED) {
+    const retryAfterHeader = res.headers['retry-after'];
+    const retryAfter = retryAfterHeader !== undefined ? parseInt(retryAfterHeader as string, 10) : undefined;
+    debug('Lock is already held. Retry-after: %d', retryAfter);
+    return { acquired: false, retryAfter };
+  }
+
+  if (res.statusCode === statusCodes.BAD_REQUEST) {
+    debug('Failed to acquire lock. Bad request');
+    throw createConfigError('httpResponseError', 'Failed to acquire lock', await createHttpErrorPayload(res));
+  }
+
+  debug('Unexpected status code while acquiring lock: %d', res.statusCode);
+  return { acquired: false };
+}
+
+export async function releaseLock(key: string, callerId: string): Promise<void> {
+  debug('Releasing lock for key %s (caller: %s)', key, callerId);
+  const { configServerUrl } = getOptions();
+  const url = `${configServerUrl}/locks/${key}/${callerId}`;
+
+  try {
+    const res = await request(url, { method: 'DELETE' });
+
+    if (res.statusCode === statusCodes.NO_CONTENT) {
+      debug('Lock released successfully');
+      return;
+    }
+
+    if (res.statusCode === statusCodes.BAD_REQUEST) {
+      debug('Failed to release lock. Bad request');
+      throw createConfigError('httpResponseError', 'Failed to release lock', await createHttpErrorPayload(res));
+    }
+
+    debug('Unexpected status code while releasing lock: %d', res.statusCode);
+  } catch (error) {
+    debug('Error during best-effort lock release (swallowed): %s', (error as Error).message);
+  }
+}

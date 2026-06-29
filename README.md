@@ -28,6 +28,8 @@ const configInstance = await config({
   pollIntervalMs: 30000,
   onChange: () => {
     console.log('Configuration changed! The process will now restart...');
+    // Note: The SDK will forcefully terminate the process
+    // immediately after this callback completes to trigger a fresh restart.
   }
 });
 
@@ -54,7 +56,7 @@ The `ConfigInstance` interface represents your way to interact with the configur
 
 ##### `getAll(): T`
 
-- **Description**: Retrieves the entire configuration object.
+- **Description**: Retrieves the entire configuration object. If hot-reloading is active, this returns the **most recent** configuration state.
 - **Returns**: The entire configuration object.
 
 ##### `getConfigParts(): { localConfig: object; config: object; envConfig: object }`
@@ -143,6 +145,34 @@ This package allows you to configure various options for loading and managing co
 - **Description**: The polling interval in milliseconds for hot-reloading.
 - **Environment Variable**: `CONFIG_POLL_INTERVAL_MS`
 
+### `rolloutKey`
+- **Type**: `string`
+- **Optional**: `true`
+- **Default**: `PACKAGE_NAME`
+- **Description**: The key used for the distributed lock (opaque identifier for the resource).
+- **Environment Variable**: `CONFIG_ROLLOUT_KEY`
+
+### `callerId`
+- **Type**: `string`
+- **Optional**: `true`
+- **Default**: `os.hostname()`
+- **Description**: The unique ID of the instance holding the lock.
+- **Environment Variable**: `CONFIG_CALLER_ID`
+
+### `rolloutLimit`
+- **Type**: `number`
+- **Optional**: `true`
+- **Default**: `1`
+- **Description**: The maximum number of concurrent rollouts allowed.
+- **Environment Variable**: `CONFIG_ROLLOUT_LIMIT`
+
+### `lockTtlSeconds`
+- **Type**: `number`
+- **Optional**: `true`
+- **Default**: `20`
+- **Description**: The time-to-live for the lock in seconds.
+- **Environment Variable**: `CONFIG_LOCK_TTL_SECONDS`
+
 ### `onChange`
 - **Type**: `(config: T) => void | Promise<void>`
 - **Optional**: `true`
@@ -159,6 +189,10 @@ The following environment variables can be used to configure the options:
 - `CONFIG_IGNORE_SERVER_IS_OLDER_VERSION_ERROR`: Sets the `ignoreServerIsOlderVersionError` option.
 - `CONFIG_POLL_INTERVAL_MS`: Sets the `pollIntervalMs` option.
 - `CONFIG_DISABLE_HOT_RELOAD`: Sets the `disableHotReload` option.
+- `CONFIG_ROLLOUT_KEY`: Sets the `rolloutKey` option.
+- `CONFIG_CALLER_ID`: Sets the `callerId` option.
+- `CONFIG_ROLLOUT_LIMIT`: Sets the `rolloutLimit` option.
+- `CONFIG_LOCK_TTL_SECONDS`: Sets the `lockTtlSeconds` option.
 
 ## Configuration Merging and Validation
 
@@ -173,6 +207,10 @@ The package supports merging configurations from multiple sources (local, remote
 1. The remote configuration is fetched from the server specified by the `configServerUrl` option.
 2. If the `version` is set to `'latest'`, the latest version of the configuration is fetched. Otherwise, the specified version is fetched.
 3. **Continuous Polling:** The SDK continuously polls the server using HTTP ETags (`If-None-Match`). When a `200 OK` is received (indicating a change), the `onChange` callback is triggered (if provided), and the process is then terminated to allow for a fresh start with the new configuration. `304 Not Modified` responses are silently ignored. To prevent cluster-wide traffic spikes (thundering herd), a **randomized jitter of +/- 15%** is automatically applied to each polling cycle.
+4. **Distributed Semaphore Locking:** To control rollout concurrency across a cluster, the SDK implements a distributed locking mechanism using four parameters: `key` (opaque identifier), `callerId` (instance ID), `ttl` (lock duration), and `limit` (max concurrent locks).
+    - **Lock Acquisition:** Before triggering the `onChange` callback during a hot-reload, the SDK attempts to acquire a lock from the configuration server.
+    - **Lock Release:** The lock is automatically released after the `onChange` callback completes (whether it succeeds or throws).
+    - **423 Locked & Retry-After:** If the server returns `423 Locked`, it indicates the rollout limit has been reached. The SDK will respect the `Retry-After` header provided by the server, waiting for the specified duration before attempting to acquire the lock again.
 
 ### Environment Variables
 
@@ -188,10 +226,11 @@ If the value of the `x-env-format` key is `json`, the environment variable value
    - Local configuration
 
 2. If a configuration option is specified in multiple sources, the value from the source with higher precedence (as listed above) is used.
+3. When a hot-reload occurs, the **Remote configuration** part is updated, and the merge is re-calculated, ensuring environment variables still win.
 
 ### Validation
 
-1. After merging, the final configuration is validated against the defined schema using ajv.
+1. After merging (and after every hot-reload), the final configuration is validated against the defined schema using ajv.
 2. The validation ensures that all required properties are present, and the types and values of properties conform to the schema.
 3. Any default value according to the schema is added to the final object.
 4. If the validation fails, an error is thrown (for initial boot).

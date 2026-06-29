@@ -1,8 +1,10 @@
+import { hostname } from 'node:os';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Interceptable, MockAgent, setGlobalDispatcher } from 'undici';
 import { commonDbPartialV1, commonS3PartialV1 } from '@map-colonies/schemas';
 import { StatusCodes } from 'http-status-codes';
 import { config } from '../src/config';
+import { PACKAGE_NAME } from '../src/constants';
 import { createMockConfigData } from './mocks';
 
 const URL = 'http://localhost:8080';
@@ -217,6 +219,10 @@ describe('config', () => {
         pollIntervalMs: 3000,
         disableHotReload: false,
         ignoreServerIsOlderVersionError: false,
+        lockTtlSeconds: 120,
+        rolloutKey: PACKAGE_NAME,
+        callerId: hostname(),
+        rolloutLimit: 1,
         terminatePod: true,
       });
     });

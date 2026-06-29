@@ -21,11 +21,19 @@ describe('Continuous Polling (ChangeDetector)', () => {
 
     setGlobalDispatcher(agent);
     client = agent.get(URL);
+
+    client
+      .intercept({ path: /\/locks.*/, method: 'POST' })
+      .reply(StatusCodes.OK)
+      .persist();
+    client
+      .intercept({ path: /\/locks.*/, method: 'DELETE' })
+      .reply(StatusCodes.NO_CONTENT)
+      .persist();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
-    onChangeMock.mockReset();
+    vi.clearAllMocks();
   });
 
   it('should trigger onChange when polling returns a new config (200 OK)', async () => {
@@ -203,7 +211,7 @@ describe('Continuous Polling (ChangeDetector)', () => {
       .reply(StatusCodes.NOT_MODIFIED);
 
     // Act (Wait for Poll)
-    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * 2);
+    await vi.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL * (1 + JITTER_PERCENTAGE));
 
     // Assert
     expect(onChangeMock).not.toHaveBeenCalled();
