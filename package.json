@@ -76,7 +76,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",
     "@map-colonies/commitlint-config": "^2.0.0",
-    "@map-colonies/eslint-config": "^7.1.0",
+    "@map-colonies/eslint-config": "^8.1.0",
     "@map-colonies/infra-copilot-instructions": "^1.0.0",
     "@map-colonies/tsconfig": "^2.0.0",
     "@types/config": "^4.4.0",
