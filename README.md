@@ -24,7 +24,11 @@ const configInstance = await config({
   configServerUrl: 'http://localhost:8080',
   schema: commonBoilerplateV4,
   version: 'latest',
-  offlineMode: false
+  offlineMode: false,
+  pollIntervalMs: 30000,
+  onChange: () => {
+    console.log('Configuration changed! The process will now restart...');
+  }
 });
 
 const port = configInstance.get('server.port');
@@ -36,14 +40,14 @@ This section describes the API provided by the package for interacting with the 
 
 ### `ConfigInstance<T>`
 
-The `ConfigInstance` interface represents the your way to interact with the configuration. It provides methods to retrieve configuration values and parts.
-`T` is the typescript type associated with the chosen schema. it can be imported from the `@map-colonies/schemas` package.
+The `ConfigInstance` interface represents your way to interact with the configuration.
+`T` is the typescript type associated with the chosen schema. It can be imported from the `@map-colonies/schemas` package.
 
 #### Methods
 
 ##### `get<TPath extends string>(path: TPath): _.GetFieldType<T, TPath>`
 
-- **Description**: Retrieves the value at the specified path from the configuration object. Note that the type of returned object is based on the path in the schema.
+- **Description**: Retrieves the value at the specified path from the configuration object.
 - **Parameters**:
   - `path` (`TPath`): The path to the desired value.
 - **Returns**: The value at the specified path.
@@ -55,7 +59,7 @@ The `ConfigInstance` interface represents the your way to interact with the conf
 
 ##### `getConfigParts(): { localConfig: object; config: object; envConfig: object }`
 
-- **Description**: Retrieves different parts of the configuration object before being merged and validated. Useful for debugging.
+- **Description**: Retrieves different parts of the configuration object before being merged and validated.
 - **Returns**: An object containing the `localConfig`, `config`, and `envConfig` parts of the configuration.
   - `localConfig`: The local configuration object.
   - `config`: The remote configuration object.
@@ -70,6 +74,9 @@ The `ConfigInstance` interface represents the your way to interact with the conf
 - **Description**: Initializes the metrics for the configuration.
 - **Parameters**:
   - `registry` (`promClient.Registry`): The prometheus registry to use for the metrics.
+
+##### `stop(): void`
+- **Description**: Stops any background processes (like hot-reloading polling). Use this during application teardown or in tests to prevent memory leaks and hanging processes.
 
 # Configuration Options
 
@@ -121,6 +128,18 @@ This package allows you to configure various options for loading and managing co
 - **Default**: `./config`
 - **Description**: The path to the local configuration folder.
 
+### `pollIntervalMs`
+- **Type**: `number`
+- **Optional**: `true`
+- **Default**: `30000`
+- **Description**: The polling interval in milliseconds for hot-reloading.
+- **Environment Variable**: `CONFIG_POLL_INTERVAL_MS`
+
+### `onChange`
+- **Type**: `(config: T) => void | Promise<void>`
+- **Optional**: `true`
+- **Description**: A callback function triggered when a configuration change is detected.
+
 ## Environment Variable Configuration
 
 The following environment variables can be used to configure the options:
@@ -130,6 +149,7 @@ The following environment variables can be used to configure the options:
 - `CONFIG_SERVER_URL`: Sets the `configServerUrl` option.
 - `CONFIG_OFFLINE_MODE`: Sets the `offlineMode` option.
 - `CONFIG_IGNORE_SERVER_IS_OLDER_VERSION_ERROR`: Sets the `ignoreServerIsOlderVersionError` option.
+- `CONFIG_POLL_INTERVAL_MS`: Sets the `pollIntervalMs` option.
 
 ## Configuration Merging and Validation
 
@@ -143,6 +163,7 @@ The package supports merging configurations from multiple sources (local, remote
 
 1. The remote configuration is fetched from the server specified by the `configServerUrl` option.
 2. If the `version` is set to `'latest'`, the latest version of the configuration is fetched. Otherwise, the specified version is fetched.
+3. **Continuous Polling:** The SDK continuously polls the server using HTTP ETags (`If-None-Match`). When a `200 OK` is received (indicating a change), the `onChange` callback is triggered (if provided), and the process is then terminated to allow for a fresh start with the new configuration. `304 Not Modified` responses are silently ignored.
 
 ### Environment Variables
 
@@ -164,7 +185,7 @@ If the value of the `x-env-format` key is `json`, the environment variable value
 1. After merging, the final configuration is validated against the defined schema using ajv.
 2. The validation ensures that all required properties are present, and the types and values of properties conform to the schema.
 3. Any default value according to the schema is added to the final object.
-4. If the validation fails, an error is thrown, indicating the invalid properties and their issues.
+4. If the validation fails, an error is thrown (for initial boot).
 
 
 # Error handling

@@ -66,6 +66,16 @@ export interface BaseOptions {
    * @default './config'
    */
   localConfigPath?: string;
+  /**
+   * The polling interval in milliseconds.
+   * @default 30000
+   */
+  pollIntervalMs?: number;
+  /**
+   * Indicates whether the pod will be terminated after an update.
+   * @default true
+   */
+  terminatePod: boolean;
 }
 
 /**
@@ -82,6 +92,10 @@ export type ConfigOptions<T extends SchemaWithType> = Prettify<
      * Depends on the prom-client package being installed.
      */
     metricsRegistry?: Registry;
+    /**
+     * The callback function that is triggered when the configuration changes.
+     */
+    onChange?: () => void | Promise<void>;
   }
 >;
 
@@ -101,11 +115,13 @@ export const optionsSchema: JSONSchemaType<BaseOptions> = {
     offlineMode: { type: 'boolean', nullable: true },
     ignoreServerIsOlderVersionError: { type: 'boolean', nullable: true },
     localConfigPath: { type: 'string', default: './config', nullable: true },
+    pollIntervalMs: { type: 'integer', default: 30000, nullable: true },
+    terminatePod: { type: 'boolean', default: true },
   },
 };
 
 /**
- * Represents the schema of the configuration object.
+ * Represents a configuration instance.
  * @template T - The type of the configuration schema.
  */
 export interface ConfigInstance<T> {
@@ -144,4 +160,9 @@ export interface ConfigInstance<T> {
    * @param registry - The registry for the metrics.
    */
   initializeMetrics: (registry: Registry) => void;
+
+  /**
+   * Stops any background processes (like hot-reloading polling).
+   */
+  stop: () => void;
 }

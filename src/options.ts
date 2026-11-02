@@ -11,6 +11,8 @@ const defaultOptions: BaseOptions = {
   configName: PACKAGE_NAME,
   configServerUrl: 'http://localhost:8080',
   version: 'latest',
+  pollIntervalMs: 30000,
+  terminatePod: true,
 };
 
 const envOptions: Partial<Record<keyof BaseOptions, string>> = {
@@ -19,6 +21,8 @@ const envOptions: Partial<Record<keyof BaseOptions, string>> = {
   version: process.env.CONFIG_VERSION,
   offlineMode: process.env.CONFIG_OFFLINE_MODE,
   ignoreServerIsOlderVersionError: process.env.CONFIG_IGNORE_SERVER_IS_OLDER_VERSION_ERROR,
+  pollIntervalMs: process.env.CONFIG_POLL_INTERVAL_MS,
+  terminatePod: process.env.CONFIG_TERMINATE_POD,
 };
 
 // in order to merge correctly the keys should not exist, undefined is not enough

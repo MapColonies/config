@@ -62,7 +62,7 @@ describe('httpClient', () => {
       client.intercept({ path: '/config/name/1?shouldDereference=true&schemaId=schema', method: 'GET' }).reply(StatusCodes.OK, config);
 
       const result = await getRemoteConfig('name', 'schema', 1);
-      expect(result).toEqual(config);
+      expect(result).toEqual({ config: config, etag: undefined });
     });
 
     it('should throw an error if the response is bad request', async () => {
