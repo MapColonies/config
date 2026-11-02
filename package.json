@@ -81,7 +81,7 @@
     "@map-colonies/tsconfig": "^2.0.0",
     "@types/config": "^4.4.0",
     "@types/debug": "^4.1.12",
-    "@types/node": "^24.0.0",
+    "@types/node": "^26.6.6",
     "@types/semver": "^7.5.8",
     "commitlint": "^19.6.1",
     "eslint": "^9.39.2",
